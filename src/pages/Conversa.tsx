@@ -100,7 +100,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
     const problema = l.problemasAbertos.includes(c.id);
     const msgs = l.mensagens.filter(m => m.clienteId === c.id).reverse();
     const ultima: Mensagem | undefined = msgs[msgs.length - 1];
-    const tipoLivre: TipoMensagem = problema ? 'problema' : (tipoSit ?? 'perto');
+    const tipoLivre: TipoMensagem = problema ? 'problema' : 'atendimento';
     const [rascunho, setRascunho] = useState(() => (problema
         ? textoMensagem(
                 c,
@@ -113,8 +113,15 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
 
     function enviar(tipo: TipoMensagem, texto: string)
     {
-        enviarMensagem(c.id, tipo, texto);
-        toast.success(`Mensagem enviada para ${c.chamar}.`);
+        try
+        {
+            enviarMensagem(c.id, tipo, texto);
+            toast.success(`Mensagem enviada para ${c.chamar}.`);
+        }
+        catch (erro)
+        {
+            toast.error(erro instanceof Error ? erro.message : 'Não foi possível enviar a mensagem.');
+        }
     }
 
     function simular(r: Resposta)
@@ -148,7 +155,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                             <CardTitle className="truncate">
                                 <h1>{c.nome}</h1>
                             </CardTitle>
-                            <CardDescription className="truncate">{TIPO_MENSAGEM[preparada ?? ultima?.tipo ?? 'perto']}</CardDescription>
+                            <CardDescription className="truncate">{TIPO_MENSAGEM[problema ? 'problema' : preparada ?? ultima?.tipo ?? 'atendimento']}</CardDescription>
                         </Link>
                     </div>
                     <CardAction>
@@ -227,14 +234,14 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                 )}
             </Card>
 
-            {!preparada && problema && (
+            {problema && (
                 <Alert variant="destructive" className="bg-card">
                     <TriangleAlert />
                     <AlertTitle>Cliente teve um problema</AlertTitle>
                     <AlertDescription>Resolva antes de perder o cliente.</AlertDescription>
                 </Alert>
             )}
-            {!preparada && problema && (
+            {problema && (
                 <Button
                     size="lg"
                     className="w-full"
@@ -297,7 +304,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                             : (
                                     <Button variant="outline" className="w-full" onClick={() => simular('quer')}>
                                         “
-                                        {textoResposta('quer', !!recompensaValida(c, hoje))}
+                                        {textoResposta('quer', recompensaValida(c, hoje)?.tipo === 'cashback')}
                                         ”
                                     </Button>
                                 )}

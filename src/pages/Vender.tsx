@@ -26,7 +26,7 @@ import {
     soDigitos,
     valorParaCampo,
 } from '@/domain/formato';
-import { recompensaValida } from '@/domain/mensagens';
+import { recompensaValida, valorACobrar } from '@/domain/mensagens';
 import type { Cliente } from '@/domain/tipos';
 import { useFregues, useHoje, useLoja } from '@/store/useFregues';
 
@@ -98,7 +98,7 @@ export function Vender()
                                 : v <= 0
                                     ? 'Informe o valor da venda.'
                                     : null;
-    const cobrar = rec?.valor && usarRecompensa ? Math.max(0, v - rec.valor) : v;
+    const cobrar = valorACobrar(v, usarRecompensa ? rec : undefined);
 
     function escolher(id: string)
     {
@@ -128,7 +128,7 @@ export function Vender()
         }
         else if (r.tipo === 'recuperada')
         {
-            toast.success(`Venda recuperada: ${brl(v)}.`, { description: `${quem} voltou depois da mensagem.` });
+            toast.success(`Venda recuperada: ${brl(r.valorPago)}.`, { description: `${quem} voltou depois da mensagem.` });
         }
         else
         {

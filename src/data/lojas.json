@@ -19,14 +19,6 @@
       "pct": 5,
       "brinde": "1 pacote de sal grosso"
     },
-    "numeros": {
-      "recuperado": 1380,
-      "voltaram": 12,
-      "novos": 20,
-      "segunda": 6,
-      "problemas": 2,
-      "recompensasUsadas": 4
-    },
     "produtos": [
       {
         "id": "p13",
@@ -210,14 +202,6 @@
       "pct": 10,
       "brinde": "limpeza grátis da ferramenta"
     },
-    "numeros": {
-      "recuperado": 640,
-      "voltaram": 7,
-      "novos": 12,
-      "segunda": 4,
-      "problemas": 1,
-      "recompensasUsadas": 2
-    },
     "produtos": [
       {
         "id": "furadeira",
@@ -325,14 +309,6 @@
       "tipo": "cashback",
       "pct": 5,
       "brinde": "1 metro de viés"
-    },
-    "numeros": {
-      "recuperado": 790,
-      "voltaram": 11,
-      "novos": 16,
-      "segunda": 5,
-      "problemas": 1,
-      "recompensasUsadas": 3
     },
     "produtos": [
       {

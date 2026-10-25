@@ -49,6 +49,7 @@ export const SELO_TIPO: Record<TipoMensagem, Selo> = {
     atrasado: { rotulo: 'Atrasado', variant: 'outline', className: AVISO },
     sumido: { rotulo: 'Sumido', variant: 'destructive' },
     problema: { rotulo: 'Problema', variant: 'destructive' },
+    atendimento: { rotulo: 'Atendimento', variant: 'secondary' },
 };
 
 /** Selo do resultado de cada mensagem enviada. */

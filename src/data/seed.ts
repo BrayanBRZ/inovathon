@@ -1,7 +1,7 @@
 /**
  * Lojas e clientes de exemplo para a demonstração.
  * Os dados ficam em `lojas.json`, com as compras em "dias atrás"; aqui viram datas a partir de `hoje`
- * e ganham o histórico de mensagens e o gráfico do mês.
+ * e ganham o histórico de mensagens.
  */
 import lojasJson from '@/data/lojas.json';
 import { somarDias } from '@/domain/formato';
@@ -12,7 +12,6 @@ import type {
     Dia,
     Loja,
     Mensagem,
-    Numeros,
     Produto,
     Regra,
     StatusMensagem,
@@ -52,7 +51,6 @@ interface ClienteSeed
  * @property tel - WhatsApp da loja.
  * @property regraSumido - Recompensa para clientes sumidos.
  * @property regraSegunda - Recompensa da segunda compra.
- * @property numeros - Resultados do mês antes da demonstração.
  * @property produtos - Produtos com preço e prazo de recompra.
  * @property clientes - Clientes e suas compras de exemplo.
  */
@@ -65,7 +63,6 @@ interface LojaSeed
     tel: string;
     regraSumido: Regra;
     regraSegunda: Regra;
-    numeros: Numeros;
     produtos: Produto[];
     clientes: ClienteSeed[];
 }
@@ -97,6 +94,7 @@ function montarLoja(s: LojaSeed, hoje: Dia): Loja
             texto,
             status,
             valorVolta,
+            encerradaEm: status === 'voltou' ? c.compras.find(x => x.recuperada && x.data >= dia(atras))?.data : undefined,
             resposta: status === 'gostei' ? { hora: '09:24', texto: textoResposta('gostei', false) } : status === 'voltou' ? { hora: '09:41', texto: textoResposta('quer', false) } : undefined,
         });
 
@@ -111,9 +109,8 @@ function montarLoja(s: LojaSeed, hoje: Dia): Loja
         produtos: s.produtos.map(p => ({ ...p })),
         clientes: [],
         mensagens,
-        numeros: { ...s.numeros },
-        recuperadoPorDia: {},
         problemasAbertos: [],
+        problemasResolvidos: [],
         auto: true,
         pulados: [],
     };
@@ -132,6 +129,7 @@ function montarLoja(s: LojaSeed, hoje: Dia): Loja
                 data: dia(d),
                 produtoId: p.id,
                 valor: p.preco,
+                valorPago: p.preco,
                 recuperada: cs.recuperadas?.some(r => r.dia === d) || undefined,
             })),
         };
@@ -153,7 +151,7 @@ function montarLoja(s: LojaSeed, hoje: Dia): Loja
         if (cs.dias.length === 1)
         {
             const atras = cs.dias[0];
-            if (s.regraSegunda.ativa && atras < s.regraSegunda.dias)
+            if (s.regraSegunda.ativa)
                 c.recompensa = novaRecompensa(
                     s.regraSegunda,
                     'segunda',
@@ -175,7 +173,7 @@ function montarLoja(s: LojaSeed, hoje: Dia): Loja
                 `Oi, ${c.chamar}! Aqui é ${s.de}. Obrigado pela compra! Deu tudo certo com ${p.nome}?`,
                 'gostei',
             );
-            if (atras >= 8) msg(
+            if (atras >= 8 && p.dica.trim()) msg(
                 c,
                 'dica',
                 atras - 7,
@@ -184,21 +182,6 @@ function montarLoja(s: LojaSeed, hoje: Dia): Loja
             );
         }
     });
-
-    // Histórico do mês para o gráfico: o que veio de mensagens, crescendo nas últimas semanas.
-    const reais = loja.clientes.flatMap(c => c.compras.filter(x => x.recuperada));
-    for (const x of reais) loja.recuperadoPorDia[x.data] = (loja.recuperadoPorDia[x.data] ?? 0) + x.valor;
-    const resto = s.numeros.recuperado - reais.reduce((a, x) => a + x.valor, 0);
-    const pesos = Array.from({ length: 28 }, (_, i) => 1 + (28 - i) / 9 + ((i * 7) % 5) / 4);
-    const soma = pesos.reduce((a, b) => a + b, 0);
-    let distribuido = 0;
-    pesos.forEach((p, i) =>
-    {
-        const v = Math.round((resto * p) / soma / 5) * 5;
-        distribuido += v;
-        if (v) loja.recuperadoPorDia[dia(i + 1)] = (loja.recuperadoPorDia[dia(i + 1)] ?? 0) + v;
-    });
-    loja.recuperadoPorDia[dia(3)] += resto - distribuido;
 
     mensagens.sort((a, b) => b.data.localeCompare(a.data) || b.hora.localeCompare(a.hora));
     return loja;

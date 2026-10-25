@@ -40,7 +40,7 @@ import { useFregues, useHoje, useLoja } from '@/store/useFregues';
 type Qual = 'regraSegunda' | 'regraSumido';
 
 const TIPOS: { id: TipoRecompensa; rotulo: string; valor: string }[] = [
-    { id: 'cashback', rotulo: 'Crédito na próxima compra', valor: 'Crédito da compra' },
+    { id: 'cashback', rotulo: 'Crédito para voltar', valor: 'Crédito da compra' },
     { id: 'brinde', rotulo: 'Brinde', valor: 'Qual brinde' },
     { id: 'entrega', rotulo: 'Entrega grátis', valor: 'Valor' },
     { id: 'desconto', rotulo: 'Desconto', valor: 'Desconto' },
@@ -224,7 +224,7 @@ function FormRegra({
                                 <InputGroupText>dias</InputGroupText>
                             </InputGroupAddon>
                         </InputGroup>
-                        <FieldDescription>De 5 a 365.</FieldDescription>
+                        <FieldDescription>{qual === 'regraSumido' ? 'De 5 a 365. Respeita também o ritmo do cliente.' : 'De 5 a 365. O convite chega antes de vencer.'}</FieldDescription>
                     </Field>
                 </FieldGroup>
 

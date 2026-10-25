@@ -6,6 +6,7 @@ import {
     type StateStorage,
 } from 'zustand/middleware';
 import { lojasExemplo } from '@/data/seed';
+import { migrarLoja } from '@/data/migracao';
 import { diaHoje, somarDias } from '@/domain/formato';
 import * as op from '@/domain/operacoes';
 import type {
@@ -148,7 +149,7 @@ export const useFregues = create<Estado>()(
                     hoje,
                     hora(),
                 )),
-                resolverProblema: id => comLoja(l => op.resolverProblema(l, id)),
+                resolverProblema: id => comLoja((l, hoje) => op.resolverProblema(l, id, hoje)),
                 alternarAuto: () =>
                     comLoja((l) =>
                     {
@@ -193,9 +194,16 @@ export const useFregues = create<Estado>()(
         },
         {
             name: 'fregues-demo',
-            version: 2,
-            // Dados de versões anteriores da demonstração são descartados: volta aos exemplos.
-            migrate: () => ({}) as Estado,
+            version: 3,
+            migrate: (persistido, versao) =>
+            {
+                if (versao < 2) return {} as Estado;
+                const dados = persistido as Dados;
+                return {
+                    ...dados,
+                    lojas: Object.fromEntries(Object.entries(dados.lojas).map(([id, loja]) => [id, migrarLoja(loja)])),
+                };
+            },
             storage: createJSONStorage(() => armazenamento),
             partialize: ({
                 lojas,

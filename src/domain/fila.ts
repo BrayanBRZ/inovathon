@@ -34,11 +34,25 @@ export function tipoDaSituacao(s: Situacao): TipoMensagem | null
     return null;
 }
 
-/** Motivo pelo qual o cliente não recebe mensagem hoje (null se recebe). */
+/**
+ * @summary
+ * Verifica bloqueios de conteúdo, atendimento, repetição e frequência do acompanhamento.
+ *
+ * @param l - Loja com mensagens e pendências.
+ * @param c - Destinatário.
+ * @param s - Situação calculada para o dia consultado.
+ * @param tipo - Mensagem pretendida; comprovantes e atendimento não são convites da régua.
+ * @param hoje - Data de referência para limites e cancelamentos.
+ * @returns Motivo do bloqueio, ou null quando o envio é permitido.
+ */
 export function bloqueio(l: Loja, c: Cliente, s: Situacao, tipo: TipoMensagem, hoje: Dia): string | null
 {
+    if (tipo === 'atendimento' || tipo === 'problema' || tipo === 'comprovante') return null;
+    if (l.problemasAbertos.includes(c.id)) return 'Resolva o problema do cliente antes de retomar o acompanhamento.';
+    if (tipo === 'dica' && !l.produtos.find(p => p.id === s.ultima.produtoId)?.dica.trim())
+        return 'Este produto não tem dica de uso cadastrada.';
     if (l.pulados.includes(chavePulo(c.id, tipo, hoje))) return 'Você pediu para não enviar hoje.';
-    const desdeCompra = l.mensagens.filter(m => m.clienteId === c.id && m.data >= s.ultima.data);
+    const desdeCompra = l.mensagens.filter(m => m.clienteId === c.id && m.data >= s.ultima.data && !m.encerradaEm);
     if (tipo === 'sumido')
     {
         const tentativas = desdeCompra.filter(m => m.tipo === 'sumido');
@@ -52,7 +66,8 @@ export function bloqueio(l: Loja, c: Cliente, s: Situacao, tipo: TipoMensagem, h
     }
     if (TIPOS_CONVITE.includes(tipo))
     {
-        const recente = desdeCompra.some(m => TIPOS_CONVITE.includes(m.tipo) && diasEntre(m.data, hoje) < LIMITE_DIAS);
+        const recente = l.mensagens.some(m => m.clienteId === c.id && TIPOS_CONVITE.includes(m.tipo)
+            && diasEntre(m.data, hoje) >= 0 && diasEntre(m.data, hoje) < LIMITE_DIAS);
         if (recente) return 'Recebeu um lembrete há menos de uma semana.';
     }
     return null;

@@ -77,7 +77,7 @@ export function Ajustes()
                 <CardHeader>
                     <CardTitle>Produtos e prazos de recompra</CardTitle>
                     <CardDescription>
-                        O prazo vale enquanto o cliente tem uma compra só. Depois, o Freguês aprende o ritmo de cada um.
+                        O prazo vale até haver compras em dias diferentes. Depois, o Freguês aprende o ritmo de cada um.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

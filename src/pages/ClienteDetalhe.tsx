@@ -2,7 +2,10 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Link, Navigate, useParams } from 'react-router';
 import {
+    AlarmClockOff,
     ChevronLeft,
+    Clock,
+    ClockAlert,
     Gift,
     MessageCircle,
     MessageSquareText,
@@ -31,9 +34,15 @@ import {
     ItemTitle,
 } from '@/components/ui/item';
 import { bloqueio, tipoDaSituacao } from '@/domain/fila';
-import { brl, ddmm, dias, waUrl } from '@/domain/formato';
+import {
+    brl,
+    ddmm,
+    dias,
+    diasEntre,
+    waUrl,
+} from '@/domain/formato';
 import { recompensaValida, TIPO_MENSAGEM } from '@/domain/mensagens';
-import { produtoDe, situacao } from '@/domain/recorrencia';
+import { ANTECEDENCIA, produtoDe, situacao } from '@/domain/recorrencia';
 import type { Dia } from '@/domain/tipos';
 import { CLASSE_AVISO, iniciais, seloCliente } from '@/lib/estados';
 import { cn } from '@/lib/utils';
@@ -71,6 +80,7 @@ function diaCurto(d: Dia, hoje: Dia): string
  *
  * @remarks
  * Redireciona para a lista quando o cliente da URL não existe na loja atual.
+ * A estimativa de recompra aparece apenas quando o cliente já tem histórico de compras.
  *
  * @returns A tela da ficha do cliente.
  */
@@ -95,6 +105,35 @@ export function ClienteDetalhe()
         ? tipo
         : null;
     const selo = seloCliente(s, hoje);
+    const diasRecompra = s.proxima ? diasEntre(hoje, s.proxima) : null;
+    const IconeRecompra = diasRecompra === null ? AlarmClockOff : diasRecompra < 0 ? ClockAlert : Clock;
+    const corRecompra = diasRecompra === null
+        ? 'text-muted-foreground'
+        : s.est === 'sumido' && diasRecompra < 0
+            ? 'text-destructive'
+            : diasRecompra < 0
+                ? 'text-orange-700 dark:text-orange-300'
+                : diasRecompra <= ANTECEDENCIA
+                    ? 'text-warning-foreground'
+                    : 'text-secondary-foreground';
+    const descricaoRecompra = diasRecompra === null
+        ? 'Disponível após compras em dias diferentes.'
+        : diasRecompra < 0
+            ? `A data estimada passou há ${dias(-diasRecompra)}.`
+            : diasRecompra === 0
+                ? 'A recompra está estimada para hoje.'
+                : `Recompra estimada em ${dias(diasRecompra)}.`;
+    const rotuloRelogio = diasRecompra === null
+        ? 'Sem estimativa de recompra'
+        : s.est === 'sumido' && diasRecompra < 0
+            ? 'Cliente sumido: estimativa vencida'
+            : diasRecompra < 0
+                ? 'Data estimada já passou'
+                : diasRecompra === 0
+                    ? 'Estimativa para hoje'
+                    : diasRecompra <= ANTECEDENCIA
+                        ? 'Data estimada se aproxima'
+                        : 'Data estimada ainda não chegou';
 
     const compras = [...c.compras].sort((a, b) => a.data.localeCompare(b.data));
     const eventos: Evento[] = [
@@ -104,7 +143,7 @@ export function ClienteDetalhe()
             hora: x.hora ?? '10:00',
             compra: true,
             titulo: `${diaCurto(x.data, hoje)} · ${i === 0 ? 'Primeira compra' : x.recuperada ? 'Voltou pela mensagem' : 'Compra'}`,
-            sub: `${produtoDe(l.produtos, x.produtoId)?.nome ?? 'Produto'} · ${brl(x.valor)}`,
+            sub: `${produtoDe(l.produtos, x.produtoId)?.nome ?? 'Produto'} · ${brl(x.valorPago ?? x.valor)}${x.valorPago !== undefined && x.valorPago !== x.valor ? ` (antes do benefício: ${brl(x.valor)})` : ''}`,
         })),
         ...l.mensagens
             .filter(m => m.clienteId === c.id)
@@ -182,17 +221,37 @@ export function ClienteDetalhe()
                     <div className="grid grid-cols-2 gap-3">
                         <Item variant="outline">
                             <ItemContent>
-                                <ItemDescription>{s.aprendido ? 'Compra a cada' : 'Prazo do produto'}</ItemDescription>
+                                <ItemDescription>{s.aprendido ? 'Intervalo médio' : 'Prazo do produto'}</ItemDescription>
                                 <ItemTitle>{dias(s.media)}</ItemTitle>
                             </ItemContent>
                         </Item>
-                        <Item variant="outline">
+                        <Item
+                            variant="outline"
+                            className={cn(
+                                diasRecompra === null
+                                    ? 'bg-muted/40'
+                                    : diasRecompra < 0
+                                        ? s.est === 'sumido' ? 'bg-destructive/5' : 'bg-orange-50 dark:bg-orange-950/20'
+                                        : diasRecompra <= ANTECEDENCIA ? 'bg-warning/40' : 'bg-secondary/40',
+                            )}
+                        >
                             <ItemContent>
-                                <ItemDescription>Próxima compra</ItemDescription>
-                                <ItemTitle>{s.est === 'sumido' ? 'Sumido' : ddmm(s.proxima)}</ItemTitle>
+                                <ItemDescription>Estimativa de recompra</ItemDescription>
+                                <ItemTitle className={cn('min-h-5', corRecompra)}>
+                                    {s.proxima ? ddmm(s.proxima) : 'Sem estimativa'}
+                                    <IconeRecompra
+                                        className={cn('size-4 shrink-0', corRecompra)}
+                                        role="img"
+                                        aria-hidden={false}
+                                        aria-label={rotuloRelogio}
+                                    />
+                                </ItemTitle>
                             </ItemContent>
                         </Item>
                     </div>
+                    <p className={cn('min-h-4 text-xs', corRecompra)}>
+                        {descricaoRecompra}
+                    </p>
 
                     <ItemGroup className="gap-0">
                         {eventos.slice(0, 4).map(e => (

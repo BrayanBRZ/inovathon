@@ -58,7 +58,10 @@ export function Mensagens()
         if (!ultimas.has(m.clienteId)) ultimas.set(m.clienteId, m);
     }
     const conversas = [...ultimas.values()]
-        .map(m => ({ m, c: l.clientes.find(x => x.id === m.clienteId) }))
+        .map(m => ({
+            m: l.problemasAbertos.includes(m.clienteId) ? { ...m, status: 'problema' as const } : m,
+            c: l.clientes.find(x => x.id === m.clienteId),
+        }))
         .filter((x): x is { m: Mensagem; c: Cliente } => !!x.c);
 
     return (

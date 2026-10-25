@@ -41,7 +41,7 @@ import { Switch } from '@/components/ui/switch';
 import { filaDoDia } from '@/domain/fila';
 import { brl, dias } from '@/domain/formato';
 import { recompensaValida, TIPO_MENSAGEM } from '@/domain/mensagens';
-import { serieRecuperado } from '@/domain/operacoes';
+import { numerosDaLoja, serieRecuperado } from '@/domain/resultados';
 import type { Cliente, Recompensa, Situacao, TipoMensagem } from '@/domain/tipos';
 import { CLASSE_AVISO, iniciais, SELO_TIPO } from '@/lib/estados';
 import { cn } from '@/lib/utils';
@@ -90,7 +90,7 @@ export function Hoje()
     const plano = useFregues(s => s.plano);
     const alternarAuto = useFregues(s => s.alternarAuto);
 
-    const n = l.numeros;
+    const n = numerosDaLoja(l, hoje);
     const vezes = Math.floor(n.recuperado / MENSALIDADE[plano]);
     const taxa = n.novos ? Math.round((n.segunda / n.novos) * 100) : 0;
     const fila = filaDoDia(l, hoje).sort((a, b) => PRIORIDADE.indexOf(a.tipo) - PRIORIDADE.indexOf(b.tipo));
@@ -114,7 +114,10 @@ export function Hoje()
 
             <Card>
                 <CardHeader>
-                    <CardDescription>Compras após os lembretes</CardDescription>
+                    <CardDescription>
+                        Compras após os lembretes ·
+                        {format(parseISO(hoje), 'MMMM/yyyy', { locale: ptBR })}
+                    </CardDescription>
                     <CardTitle className="text-3xl font-semibold tabular-nums">{brl(n.recuperado)}</CardTitle>
                     <CardAction>
                         <Badge variant="secondary">
@@ -124,6 +127,7 @@ export function Hoje()
                     </CardAction>
                 </CardHeader>
                 <CardContent>
+                    <p className="mb-2 text-xs text-muted-foreground">Valor cobrado no mês · gráfico dos últimos 7 dias</p>
                     <ChartContainer config={configGrafico} className="aspect-auto h-28 w-full">
                         <BarChart accessibilityLayer data={serie} margin={{ left: 0, right: 0, top: 4 }}>
                             <XAxis dataKey="rotulo" tickLine={false} axisLine={false} tickMargin={8} />
@@ -141,8 +145,9 @@ export function Hoje()
             <div className="grid grid-cols-2 gap-3">
                 <Card>
                     <CardHeader>
-                        <CardDescription>Clientes voltaram</CardDescription>
+                        <CardDescription>Voltaram neste mês</CardDescription>
                         <CardTitle className="text-2xl font-semibold tabular-nums">{n.voltaram}</CardTitle>
+                        <CardDescription className="min-h-8 text-xs">Clientes distintos</CardDescription>
                     </CardHeader>
                 </Card>
                 <Card>
@@ -152,6 +157,7 @@ export function Hoje()
                             {taxa}
                             %
                         </CardTitle>
+                        <CardDescription className="min-h-8 text-xs">{`${n.segunda} de ${n.novos} clientes da base`}</CardDescription>
                     </CardHeader>
                 </Card>
             </div>
@@ -218,10 +224,10 @@ export function Hoje()
                             ))}
                         </ul>
                     )}
-            {total > MAX_OPORTUNIDADES && (
+            {fila.length > Math.max(0, MAX_OPORTUNIDADES - problemas.length) && (
                 <Button asChild variant="ghost" className="w-full">
                     <Link to="/mensagens?aba=programadas">
-                        {`Ver todas as ${total} oportunidades`}
+                        {`Ver todas as ${fila.length} mensagens preparadas`}
                     </Link>
                 </Button>
             )}

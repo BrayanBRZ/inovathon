@@ -19,6 +19,7 @@ export const TIPO_MENSAGEM: Record<TipoMensagem, string> = {
     atrasado: 'Lembrete de recompra',
     sumido: 'Reativação de sumido',
     problema: 'Resposta a problema',
+    atendimento: 'Atendimento',
 };
 
 /** Tipos que contam para o limite de 1 mensagem por semana e para a venda recuperada. */
@@ -40,7 +41,17 @@ export function premioTxt(r: Regra, valor?: number): string
     return r.brinde ? `${r.brinde} de brinde` : 'um brinde';
 }
 
-/** Recompensa criada a partir de uma regra, com validade contada a partir de `dia`. */
+/**
+ * @summary
+ * Concede um benefício preservando os termos da regra no momento da emissão.
+ *
+ * @param r - Regra que define o benefício.
+ * @param origem - Condição de concessão: segunda compra ou reativação.
+ * @param valorCompra - Valor bruto usado como base do cashback em reais.
+ * @param dia - Data de concessão.
+ * @param validade - Quantidade de dias até o vencimento, inclusive.
+ * @returns Oferta com tipo, percentual, descrição e validade próprios.
+ */
 export function novaRecompensa(
     r: Regra,
     origem: Recompensa['origem'],
@@ -51,6 +62,8 @@ export function novaRecompensa(
 {
     return {
         origem,
+        tipo: r.tipo,
+        pct: r.pct,
         descricao: premioTxt(r, valorCompra),
         valor:
       r.tipo === 'cashback' ? Math.round(valorCompra * r.pct) / 100 : undefined,
@@ -58,14 +71,39 @@ export function novaRecompensa(
     };
 }
 
+/**
+ * @summary
+ * Verifica a validade e a elegibilidade do benefício para a próxima venda.
+ *
+ * @param c - Cliente com seu histórico e oferta concedida.
+ * @param hoje - Data de referência; o dia de vencimento ainda permite resgate.
+ * @returns Benefício válido; undefined se vencido ou se a segunda compra já ocorreu.
+ */
 export function recompensaValida(
     c: Cliente,
     hoje: Dia,
 ): Recompensa | undefined
 {
     return c.recompensa && c.recompensa.validaAte >= hoje
+        && (c.recompensa.origem !== 'segunda' || c.compras.length === 1)
         ? c.recompensa
         : undefined;
+}
+
+/**
+ * @summary
+ * Calcula a cobrança com os termos do benefício concedido.
+ *
+ * @param valor - Valor bruto da venda em reais.
+ * @param rec - Benefício elegível e selecionado; ausente mantém a cobrança integral.
+ * @returns Valor em reais, arredondado em centavos e nunca negativo.
+ */
+export function valorACobrar(valor: number, rec?: Recompensa): number
+{
+    const abatimento = rec?.tipo === 'cashback'
+        ? rec.valor ?? 0
+        : rec?.tipo === 'desconto' ? valor * rec.pct / 100 : 0;
+    return Math.max(0, Math.round((valor - abatimento) * 100) / 100);
 }
 
 function oi(c: Cliente, l: Loja)
@@ -84,8 +122,8 @@ export function textoComprovante(
     if (rec)
     {
         t
-            += l.regraSegunda.tipo === 'cashback'
-                ? ` Você ganhou ${rec.descricao} pra usar até ${ddmm(rec.validaAte)}.`
+            += rec.tipo === 'cashback'
+                ? ` Você ganhou ${rec.descricao} pra usar na segunda compra, até ${ddmm(rec.validaAte)}.`
                 : ` Na sua segunda compra, até ${ddmm(rec.validaAte)}, você ganha ${rec.descricao}.`;
     }
     return t;
@@ -109,7 +147,9 @@ export function textoMensagem(
         case 'obrigado':
             return `${o}Obrigado pela compra! Deu tudo certo com ${nome}?`;
         case 'dica':
-            return `${o}Uma dica pra você: ${p?.dica ?? ''}`;
+            return p?.dica.trim() ? `${o}Uma dica pra você: ${p.dica}` : '';
+        case 'atendimento':
+            return '';
         case 'problema':
             return `${o}Vi que você teve um problema com ${nome}. Me conta o que aconteceu? Quero resolver pra você.`;
         case 'comprovante':

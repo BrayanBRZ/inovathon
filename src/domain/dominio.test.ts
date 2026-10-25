@@ -8,9 +8,9 @@ import {
     enviarMensagem,
     registrarVenda,
     responder,
-    serieRecuperado,
 } from './operacoes';
 import { situacao } from './recorrencia';
+import { numerosDaLoja, serieRecuperado } from './resultados';
 import type { Loja } from './tipos';
 
 const HOJE = '2026-10-24';
@@ -56,6 +56,45 @@ describe('motor de recorrência', () =>
     it('aprende o intervalo médio entre compras', () =>
     {
         expect(sit(gas(), 'Dona Maria')).toMatchObject({ media: 40, desde: 37, est: 'perto', aprendido: true });
+    });
+
+    it('não estima a recompra com apenas uma compra, mesmo conhecendo o prazo do produto', () =>
+    {
+        expect(sit(gas(), 'Fernanda')).toMatchObject({ media: 15, aprendido: false, proxima: null });
+    });
+
+    it('continua sem estimativa quando um cliente de uma compra só fica sumido', () =>
+    {
+        expect(sit(gas(), 'Marcos', somarDias(HOJE, 30))).toMatchObject({
+            est: 'sumido',
+            aprendido: false,
+            proxima: null,
+        });
+    });
+
+    it('estima a recompra pelo histórico, mesmo se as compras estiverem fora de ordem', () =>
+    {
+        const l = gas();
+        cli(l, 'Dona Maria').compras.reverse();
+        expect(sit(l, 'Dona Maria').proxima).toBe(somarDias(HOJE, 3));
+    });
+
+    it('preserva a data estimada de um cliente sumido, mesmo quando ela já passou', () =>
+    {
+        expect(sit(gas(), 'Edna')).toMatchObject({
+            est: 'sumido',
+            aprendido: true,
+            proxima: somarDias(HOJE, -30),
+        });
+    });
+
+    it('passa a estimar a recompra após o registro da segunda compra', () =>
+    {
+        const l = gas();
+        const marcos = cli(l, 'Marcos');
+        expect(sit(l, 'Marcos').proxima).toBeNull();
+        registrarVenda(l, { clienteId: marcos.id, produtoId: 'p13', valor: 115 }, HOJE, '11:00');
+        expect(sit(l, 'Marcos')).toMatchObject({ aprendido: true, proxima: somarDias(HOJE, 37) });
     });
 
     it('Edna, 65 dias sem comprar, está sumida', () =>
@@ -146,8 +185,8 @@ describe('venda', () =>
         const maria = cli(l, 'Dona Maria');
         const r = registrarVenda(l, { clienteId: maria.id, produtoId: 'p13', valor: 115 }, somarDias(HOJE, 3), '15:00');
         expect(r.tipo).toBe('recuperada');
-        expect(l.numeros.recuperado).toBe(1380 + 115);
-        expect(l.numeros.voltaram).toBe(13);
+        expect(numerosDaLoja(l, somarDias(HOJE, 3)).recuperado).toBe(130 + 115);
+        expect(numerosDaLoja(l, somarDias(HOJE, 3)).voltaram).toBe(3);
     });
 
     it('compra sem lembrete recente não conta como recuperada', () =>
@@ -156,7 +195,7 @@ describe('venda', () =>
         const claudia = cli(l, 'Cláudia');
         const r = registrarVenda(l, { clienteId: claudia.id, produtoId: 'carvao', valor: 30 }, HOJE, '15:00');
         expect(r.tipo).toBe('normal');
-        expect(l.numeros.recuperado).toBe(1380);
+        expect(numerosDaLoja(l, HOJE).recuperado).toBe(130);
     });
 
     it('cliente novo ganha a recompensa da 2ª compra e recebe o comprovante', () =>
@@ -166,7 +205,7 @@ describe('venda', () =>
         expect(r.tipo).toBe('novo');
         expect(r.cliente.recompensa).toMatchObject({ valor: 5.75, validaAte: somarDias(HOJE, 45) });
         expect(txt(r.mensagem?.texto)).toContain('Você ganhou R$ 5,75 de cashback');
-        expect(l.numeros.novos).toBe(21);
+        expect(numerosDaLoja(l, HOJE).novos).toBe(11);
     });
 
     it('Marcos responde ao convite e volta: 2ª compra, venda recuperada e cashback usado', () =>
@@ -186,17 +225,17 @@ describe('venda', () =>
         const r = registrarVenda(l, { clienteId: marcos.id, produtoId: 'p13', valor: 115, usarRecompensa: true }, HOJE, '11:00');
         expect(r.tipo).toBe('recuperada');
         expect(m.status).toBe('voltou');
-        expect(l.numeros).toMatchObject({ segunda: 7, recompensasUsadas: 5, recuperado: 1495 });
+        expect(numerosDaLoja(l, HOJE)).toMatchObject({ segunda: 8, recompensasUsadas: 1, recuperado: 239.25 });
         expect(cli(l, 'Marcos').recompensa).toBeUndefined();
-        expect(serieRecuperado(l, HOJE).at(-1)).toEqual({ dia: HOJE, valor: 115 });
+        expect(serieRecuperado(l, HOJE).at(-1)).toEqual({ dia: HOJE, valor: 109.25 });
     });
 
     it('o histórico diário do gráfico soma o total do mês', () =>
     {
         const l = gas();
-        const soma = Object.values(l.recuperadoPorDia).reduce((a, b) => a + b, 0);
-        expect(soma).toBe(l.numeros.recuperado);
-        expect(Object.values(l.recuperadoPorDia).every(v => v > 0)).toBe(true);
+        const serie = serieRecuperado(l, HOJE, 24);
+        expect(serie.reduce((a, x) => a + x.valor, 0)).toBe(numerosDaLoja(l, HOJE).recuperado);
+        expect(serie.every(x => x.valor >= 0)).toBe(true);
     });
 
     it('"Tive um problema" abre um alerta', () =>
