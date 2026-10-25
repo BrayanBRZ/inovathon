@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group';
+import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
@@ -29,9 +30,12 @@ import {
 import { recompensaValida, valorACobrar } from '@/domain/mensagens';
 import type { Cliente } from '@/domain/tipos';
 import { campoMascarado, mascaraCpf, mascaraTelefone, mascaraValor } from '@/lib/mascaras';
-import { useLotes } from '@/lib/listagem';
 import { useFregues, useHoje, useLoja } from '@/store/useFregues';
 
+/**
+ * @summary
+ * Origem do cliente que está realizando a compra.
+ */
 type Modo = 'existente' | 'novo';
 
 function ultimaCompra(c: Cliente)
@@ -61,7 +65,8 @@ export function Vender()
     const voltarPara = inicial ? `/clientes/${inicial.id}` : '/';
     const [modo, setModo] = useState<Modo>(params.get('novo') === '1' ? 'novo' : 'existente');
     const [clienteId, setClienteId] = useState<string>(inicial?.id ?? '');
-    const [busca, setBusca] = useState('');
+    const [busca, setBusca] = useState(inicial?.nome ?? '');
+    const [pesquisando, setPesquisando] = useState(false);
     const [novo, setNovo] = useState({ nome: '', tel: '', cpf: '', ok: false });
     const [produtoId, setProdutoId] = useState<string>(inicial ? ultimaCompra(inicial).produtoId : '');
     const [valor, setValor] = useState(inicial ? valorParaCampo(ultimaCompra(inicial).valor) : '');
@@ -75,17 +80,18 @@ export function Vender()
     {
         const q = busca.trim().toLowerCase();
         const qd = soDigitos(q);
+        if (!q) return [];
         return [...l.clientes]
             // Quem veio da ficha do cliente fica no topo; os outros, de quem comprou por último.
             .sort((a, b) =>
                 Number(b.id === inicial?.id) - Number(a.id === inicial?.id)
                 || ultimaCompra(b).data.localeCompare(ultimaCompra(a).data))
             .filter(c =>
-                !q
-                || c.nome.toLowerCase().includes(q)
-                || (qd.length > 2 && (soDigitos(c.tel).includes(qd) || soDigitos(c.cpf ?? '').includes(qd))));
+                c.nome.toLowerCase().includes(q)
+                || (qd.length > 0 && (soDigitos(c.tel).includes(qd) || soDigitos(c.cpf ?? '').includes(qd))))
+            .slice(0, 5);
     }, [l.clientes, busca, inicial?.id]);
-    const lotes = useLotes(lista.length, JSON.stringify([l.id, 'vender', busca, modo]));
+    const buscaAberta = pesquisando && !!busca.trim();
 
     const falta
         = modo === 'existente' && !cliente
@@ -108,6 +114,9 @@ export function Vender()
         const c = l.clientes.find(x => x.id === id);
         if (!c) return;
         setClienteId(c.id);
+        setBusca(c.nome);
+        document.getElementById('busca-venda')?.focus({ preventScroll: true });
+        setPesquisando(false);
         const u = ultimaCompra(c);
         setProdutoId(u.produtoId);
         setValor(valorParaCampo(u.valor));
@@ -166,7 +175,7 @@ export function Vender()
                         onValueChange={(m) =>
                         {
                             setModo(m as Modo);
-                            lotes.reiniciar();
+                            setPesquisando(false);
                         }}
                     >
                         <TabsList className="w-full">
@@ -175,54 +184,90 @@ export function Vender()
                         </TabsList>
 
                         <TabsContent value="existente" className="mt-2 flex h-80 flex-col gap-2">
-                            <InputGroup>
-                                <InputGroupAddon>
-                                    <Search />
-                                </InputGroupAddon>
-                                <InputGroupInput
-                                    type="search"
-                                    aria-label="Buscar cliente por nome, CPF ou número de telefone"
-                                    placeholder="Nome, CPF ou número de telefone"
-                                    autoComplete="off"
-                                    value={busca}
-                                    onChange={(e) =>
+                            <Popover open={buscaAberta} onOpenChange={setPesquisando}>
+                                <PopoverAnchor asChild>
+                                    <InputGroup>
+                                        <InputGroupAddon>
+                                            <Search />
+                                        </InputGroupAddon>
+                                        <InputGroupInput
+                                            id="busca-venda"
+                                            type="search"
+                                            aria-label="Buscar cliente por nome, CPF ou número de telefone"
+                                            aria-haspopup="dialog"
+                                            aria-expanded={buscaAberta}
+                                            aria-describedby="ajuda-busca-venda"
+                                            placeholder="Nome, CPF ou número de telefone"
+                                            autoComplete="off"
+                                            value={busca}
+                                            onFocus={() => setPesquisando(true)}
+                                            onKeyDown={(e) =>
+                                            {
+                                                if (e.key === 'Escape') setPesquisando(false);
+                                                if (e.key === 'ArrowDown' && lista.length > 0)
+                                                {
+                                                    e.preventDefault();
+                                                    setPesquisando(true);
+                                                    requestAnimationFrame(() => document.getElementById(`resultado-${lista[0].id}`)?.focus());
+                                                }
+                                                if (e.key === 'Enter' && buscaAberta && lista.length > 0)
+                                                {
+                                                    e.preventDefault();
+                                                    escolher(lista[0].id);
+                                                }
+                                            }}
+                                            onChange={(e) =>
+                                            {
+                                                setBusca(e.target.value);
+                                                setClienteId('');
+                                                setPesquisando(true);
+                                            }}
+                                        />
+                                    </InputGroup>
+                                </PopoverAnchor>
+                                <PopoverContent
+                                    align="start"
+                                    aria-label="Resultados da busca de clientes"
+                                    className="w-(--radix-popover-trigger-width) overflow-hidden p-0"
+                                    onOpenAutoFocus={e => e.preventDefault()}
+                                    onCloseAutoFocus={e => e.preventDefault()}
+                                    onInteractOutside={(e) =>
                                     {
-                                        setBusca(e.target.value);
-                                        lotes.reiniciar();
+                                        if (e.target instanceof Element && e.target.id === 'busca-venda') e.preventDefault();
                                     }}
-                                />
-                            </InputGroup>
-                            <ScrollArea className="min-h-0 flex-1 rounded-lg">
-                                {lista.length === 0
-                                    ? <p className="py-10 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</p>
-                                    : (
-                                            <RadioGroup aria-label="Clientes" value={clienteId} onValueChange={escolher} className="gap-2">
-                                                {lista.slice(0, lotes.exibidos).map(c => (
-                                                    <FieldLabel key={c.id} htmlFor={`cli-${c.id}`}>
-                                                        <Field orientation="horizontal">
-                                                            <FieldContent className="min-w-0">
-                                                                <FieldTitle className="w-full truncate">{c.nome}</FieldTitle>
-                                                                <FieldDescription>{c.tel}</FieldDescription>
-                                                            </FieldContent>
-                                                            <RadioGroupItem value={c.id} id={`cli-${c.id}`} />
-                                                        </Field>
-                                                    </FieldLabel>
-                                                ))}
-                                            </RadioGroup>
-                                        )}
-                            </ScrollArea>
-                            {lista.length > 0 && (
-                                <div className="flex flex-col gap-1">
-                                    <p role="status" className="text-center text-xs text-muted-foreground">
-                                        {`${lotes.exibidos} de ${lista.length} clientes`}
-                                    </p>
-                                    {lotes.temMais && (
-                                        <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={lotes.carregarMais}>
-                                            Carregar mais clientes
-                                        </Button>
-                                    )}
-                                </div>
-                            )}
+                                >
+                                    <ScrollArea className="max-h-72 **:data-[slot=scroll-area-viewport]:max-h-72">
+                                        {lista.length === 0
+                                            ? <p role="status" className="px-4 py-6 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</p>
+                                            : (
+                                                    <ul aria-label="Clientes encontrados">
+                                                        {lista.map(c => (
+                                                            <li key={c.id}>
+                                                                <Button
+                                                                    id={`resultado-${c.id}`}
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    aria-pressed={clienteId === c.id}
+                                                                    className="h-auto w-full justify-start rounded-none px-4 py-3 text-left whitespace-normal focus-visible:ring-inset"
+                                                                    onClick={() => escolher(c.id)}
+                                                                >
+                                                                    <span className="flex min-w-0 flex-col gap-0.5">
+                                                                        <span className="truncate font-medium">{c.nome}</span>
+                                                                        <span className="text-sm font-normal text-muted-foreground">{c.tel}</span>
+                                                                    </span>
+                                                                </Button>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                    </ScrollArea>
+                                </PopoverContent>
+                            </Popover>
+                            <p id="ajuda-busca-venda" role="status" className="min-h-10 text-sm text-muted-foreground">
+                                {cliente
+                                    ? `Cliente selecionado: ${cliente.nome} · ${cliente.tel}`
+                                    : 'Digite para pesquisar. Exibimos até 5 clientes por busca.'}
+                            </p>
                         </TabsContent>
 
                         <TabsContent value="novo" className="mt-2 h-80">
