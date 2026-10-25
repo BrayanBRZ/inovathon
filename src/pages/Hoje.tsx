@@ -72,12 +72,6 @@ const configGrafico = {
     valor: { label: 'Vendas', color: 'var(--chart-1)' },
 } satisfies ChartConfig;
 
-function saudacao(): string
-{
-    const h = new Date().getHours();
-    return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-}
-
 /**
  * @summary
  * Tela inicial: resultado do mês, envio automático e quem chamar hoje.
@@ -104,8 +98,8 @@ export function Hoje()
     return (
         <div className="flex flex-col gap-3">
             <header className="mb-1">
-                <h1 className="font-heading text-xl font-semibold tracking-tight">
-                    {`${saudacao()}, ${l.dono.split(' ')[0]}`}
+                <h1 className="font-heading text-xl font-semibold tracking-tight wrap-break-word">
+                    {l.nome}
                 </h1>
                 <p className="text-sm text-muted-foreground">
                     {format(parseISO(hoje), 'EEEE, d \'de\' MMMM', { locale: ptBR })}

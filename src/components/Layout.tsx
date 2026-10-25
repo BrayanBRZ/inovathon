@@ -1,15 +1,16 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useNavigationType } from 'react-router';
 import {
+    BadgeDollarSign,
     Box,
     Gift,
     House,
     type LucideIcon,
     MessageSquareText,
-    Plus,
     Settings,
-    Store,
 } from 'lucide-react';
+import logoDark from '@/assets/logo-dark.png';
+import logoWhite from '@/assets/logo-white.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
@@ -36,7 +37,7 @@ interface ItemMenu {
 const MENU: ItemMenu[] = [
     { to: '/', rotulo: 'Hoje', Icone: House },
     { to: '/clientes', rotulo: 'Gestão', Icone: Box },
-    { to: '/vender', rotulo: 'Nova venda', Icone: Plus, central: true },
+    { to: '/vender', rotulo: 'Nova venda', Icone: BadgeDollarSign, central: true },
     { to: '/mensagens', rotulo: 'Mensagens', Icone: MessageSquareText },
     { to: '/recompensas', rotulo: 'Recompensas', Icone: Gift },
 ];
@@ -130,23 +131,29 @@ export function Layout()
 
     return (
         <div className="min-h-dvh">
-            <header className="sticky top-0 z-30 bg-background/60 pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150">
-                <div className="mx-auto flex h-14 max-w-lg items-center gap-3 px-4">
+            <header className="sticky top-0 z-30 border-b bg-background pt-[env(safe-area-inset-top)]">
+                <div className="mx-auto flex h-20 max-w-lg items-center gap-3 px-4">
                     <Link
                         to="/"
-                        className="flex min-w-0 flex-1 items-center gap-2.5"
+                        aria-label="Freguês · Início"
+                        className="flex min-w-0 flex-1 items-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                            <Store className="size-4" aria-hidden />
+                        <span className="flex h-12 w-36 max-w-full shrink-0 items-center justify-center">
+                            <img
+                                src={logoWhite}
+                                alt="Freguês"
+                                width={2162}
+                                height={727}
+                                className="h-full w-full object-contain dark:hidden"
+                            />
+                            <img
+                                src={logoDark}
+                                alt="Freguês"
+                                width={2172}
+                                height={724}
+                                className="hidden h-full w-full object-contain dark:block"
+                            />
                         </span>
-                        <div className="min-w-0">
-                            <p className="font-heading text-sm leading-tight font-semibold tracking-tight">
-                                Freguês
-                            </p>
-                            <p className="truncate text-xs text-muted-foreground">
-                                {loja.nome}
-                            </p>
-                        </div>
                     </Link>
                     <Badge variant="outline" className="text-muted-foreground">
                         Demo
@@ -172,10 +179,10 @@ export function Layout()
                 <Outlet />
             </main>
 
-            {/* Menu flutuante em vidro escuro; a venda fica no centro, em destaque. */}
+            {/* Menu sólido em marinho; a venda fica no centro, em destaque. */}
             <nav
                 aria-label="Menu principal"
-                className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-full bg-dock text-dock-foreground shadow-glass ring-1 ring-white/10 backdrop-blur-xl backdrop-saturate-150"
+                className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-full bg-dock text-dock-foreground shadow-overlay ring-1 ring-dock-foreground/15"
             >
                 <ul className="grid h-16 grid-cols-5 items-center px-1.5">
                     {MENU.map(({ to, rotulo, Icone, central }) => (
@@ -185,7 +192,7 @@ export function Layout()
                                         <Button
                                             asChild
                                             size="icon-lg"
-                                            className="size-12 rounded-full bg-dock-foreground text-dock shadow-glass hover:bg-dock-foreground/90"
+                                            className="size-12 rounded-full bg-brand text-brand-foreground shadow-surface hover:bg-brand-hover"
                                         >
                                             <Link
                                                 to={to}
