@@ -104,13 +104,12 @@ export function Hoje()
     return (
         <div className="flex flex-col gap-3">
             <header className="mb-1">
-                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                    {format(parseISO(hoje), 'EEEE, d \'de\' MMMM', { locale: ptBR })}
-                </p>
                 <h1 className="font-heading text-xl font-semibold tracking-tight">
                     {`${saudacao()}, ${l.dono.split(' ')[0]}`}
                 </h1>
-                <p className="text-sm text-muted-foreground">Veja quem chamar hoje.</p>
+                <p className="text-sm text-muted-foreground">
+                    {format(parseISO(hoje), 'EEEE, d \'de\' MMMM', { locale: ptBR })}
+                </p>
             </header>
 
             <Card>

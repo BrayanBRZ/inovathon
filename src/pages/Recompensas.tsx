@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
-import { Gift, SlidersHorizontal, TrendingUp } from 'lucide-react';
+import { Gift, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -86,14 +85,6 @@ export function Recompensas()
                     <ItemDescription>Pós-venda e lembretes acompanham o cliente até ele voltar.</ItemDescription>
                 </ItemContent>
             </Item>
-
-            <Button asChild variant="ghost" size="sm" className="w-full text-muted-foreground">
-                <Link to="/ajustes#demo">
-                    <SlidersHorizontal data-icon="inline-start" />
-                    {' '}
-                    Modo demonstração
-                </Link>
-            </Button>
         </div>
     );
 }

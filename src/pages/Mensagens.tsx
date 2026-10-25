@@ -272,15 +272,15 @@ export function Mensagens()
                                 </Empty>
                             )
                         : (
-                                <Card className="py-1">
-                                    <ItemGroup className="gap-0">
+                                <Card className="py-0">
+                                    <ItemGroup className="gap-0!">
                                         {conversasFiltradas.slice(0, lotes.exibidos).map(({ m, c }, i) =>
                                         {
                                             const st = SELO_STATUS[m.status];
                                             return (
                                                 <div key={c.id} role="listitem">
                                                     {i > 0 && <ItemSeparator className="my-0" />}
-                                                    <Item asChild size="sm" className="rounded-none px-4">
+                                                    <Item asChild size="sm" className="rounded-none px-4 py-3.5">
                                                         <Link to={`/mensagens/${c.id}`} state={lotes.estadoDetalhe}>
                                                             <ItemMedia>
                                                                 <Avatar>
@@ -355,12 +355,12 @@ export function Mensagens()
                                 </Empty>
                             )
                         : (
-                                <Card className="py-1">
-                                    <ItemGroup className="gap-0">
+                                <Card className="py-0">
+                                    <ItemGroup className="gap-0!">
                                         {programadas.slice(0, lotes.exibidos).map(({ cliente: c, tipo }, i) => (
                                             <div key={c.id} role="listitem">
                                                 {i > 0 && <ItemSeparator className="my-0" />}
-                                                <Item asChild size="sm" className="rounded-none px-4">
+                                                <Item asChild size="sm" className="rounded-none px-4 py-3.5">
                                                     <Link to={`/mensagens/${c.id}`} state={lotes.estadoDetalhe}>
                                                         <ItemMedia>
                                                             <Avatar>
@@ -397,14 +397,6 @@ export function Mensagens()
                     )}
                 </div>
             )}
-
-            <Button asChild variant="ghost" size="sm" className="w-full text-muted-foreground">
-                <Link to="/ajustes#demo">
-                    <SlidersHorizontal data-icon="inline-start" />
-                    {' '}
-                    Modo demonstração
-                </Link>
-            </Button>
         </div>
     );
 }
