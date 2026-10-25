@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
 import {
     CheckCheck,
@@ -32,6 +32,7 @@ import { type Resposta, textoResposta } from '@/domain/operacoes';
 import { situacao } from '@/domain/recorrencia';
 import type { Cliente, Loja, Mensagem, TipoMensagem } from '@/domain/tipos';
 import { iniciais } from '@/lib/estados';
+import { useLotes, useRetornoLista } from '@/lib/listagem';
 import { useFregues, useHoje, useLoja } from '@/store/useFregues';
 
 /**
@@ -99,6 +100,20 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
         : '';
     const problema = l.problemasAbertos.includes(c.id);
     const msgs = l.mensagens.filter(m => m.clienteId === c.id).reverse();
+    const lotes = useLotes(msgs.length, JSON.stringify([l.id, 'conversa', c.id]));
+    const retorno = useRetornoLista('/mensagens');
+    const visiveis = msgs.slice(msgs.length - lotes.exibidos);
+    const historico = useRef<HTMLOListElement>(null);
+    const ancora = useRef<{ elemento: Element; topo: number } | null>(null);
+
+    // Compensa a altura acrescentada acima das mensagens que a pessoa estava lendo.
+    useLayoutEffect(() =>
+    {
+        const anterior = ancora.current;
+        if (!anterior) return;
+        window.scrollBy(0, anterior.elemento.getBoundingClientRect().top - anterior.topo);
+        ancora.current = null;
+    }, [lotes.exibidos]);
     const ultima: Mensagem | undefined = msgs[msgs.length - 1];
     const tipoLivre: TipoMensagem = problema ? 'problema' : 'atendimento';
     const [rascunho, setRascunho] = useState(() => (problema
@@ -138,7 +153,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
     return (
         <div className="flex flex-col gap-3">
             <Button asChild variant="ghost" className="-ml-2 self-start">
-                <Link to="/mensagens">
+                <Link {...retorno}>
                     <ChevronLeft data-icon="inline-start" />
                     {' '}
                     Mensagens
@@ -164,13 +179,37 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                 </CardHeader>
 
                 <CardContent className="bg-muted/50 py-4">
-                    <ol className="flex flex-col gap-2" aria-label="Conversa">
+                    {msgs.length > 0 && (
+                        <div className="mb-3 flex flex-col gap-2">
+                            <p role="status" className="text-center text-xs text-muted-foreground">
+                                {`${lotes.exibidos} de ${msgs.length} mensagens`}
+                            </p>
+                            {lotes.temMais && (
+                                <Button
+                                    variant="outline"
+                                    className="min-h-11 w-full"
+                                    onClick={() =>
+                                    {
+                                        const elemento = historico.current?.firstElementChild;
+                                        if (elemento)
+                                        {
+                                            ancora.current = { elemento, topo: elemento.getBoundingClientRect().top };
+                                        }
+                                        lotes.carregarMais();
+                                    }}
+                                >
+                                    Carregar mensagens anteriores
+                                </Button>
+                            )}
+                        </div>
+                    )}
+                    <ol ref={historico} className="flex flex-col gap-2" aria-label="Conversa">
                         {msgs.length === 0 && !preparada && (
                             <li className="py-6 text-center text-sm text-muted-foreground">Nenhuma mensagem ainda.</li>
                         )}
-                        {msgs.map((m, i) => (
+                        {visiveis.map((m, i) => (
                             <li key={m.id} className="flex flex-col gap-2">
-                                {(i === 0 || msgs[i - 1].data !== m.data) && (
+                                {(i === 0 || visiveis[i - 1].data !== m.data) && (
                                     <Badge variant="outline" className="self-center bg-card">{quando(m.data, hoje)}</Badge>
                                 )}
                                 <Card size="sm" className="ml-10 max-w-[85%] gap-1 self-end rounded-br-sm bg-secondary py-2.5 text-foreground ring-0">

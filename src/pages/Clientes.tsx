@@ -1,10 +1,17 @@
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { ChevronRight, Search, UserPlus, UsersRound } from 'lucide-react';
+import {
+    ChevronRight,
+    Search,
+    SlidersHorizontal,
+    UserPlus,
+    UsersRound,
+    X,
+} from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
     Empty,
     EmptyDescription,
@@ -13,6 +20,7 @@ import {
     EmptyTitle,
 } from '@/components/ui/empty';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { Label } from '@/components/ui/label';
 import {
     Item,
     ItemActions,
@@ -23,15 +31,50 @@ import {
     ItemSeparator,
     ItemTitle,
 } from '@/components/ui/item';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { dias, soDigitos } from '@/domain/formato';
 import { produtoDe } from '@/domain/recorrencia';
-import type { EstadoCliente, Situacao } from '@/domain/tipos';
+import type { Dia, EstadoCliente, Situacao } from '@/domain/tipos';
 import { iniciais, retornou, seloCliente, useSituacoes } from '@/lib/estados';
+import { useLotes } from '@/lib/listagem';
 import { cn } from '@/lib/utils';
 import { useHoje, useLoja } from '@/store/useFregues';
 
-type Filtro = 'todos' | 'novos' | 'voltar';
+/**
+ * @summary
+ * Critérios de acompanhamento da lista, incluindo o selo de retorno e o grupo que precisa voltar.
+ */
+type Filtro = 'todos' | 'novos' | 'voltar' | 'emdia' | 'perto' | 'atrasado' | 'sumido' | 'retornou';
+/**
+ * @summary
+ * Opção visível do filtro por status do cliente.
+ *
+ * @property valor - Critério preservado na URL.
+ * @property rotulo - Nome apresentado no seletor e no resumo dos resultados.
+ * @property descricao - Explicação do acompanhamento para o critério selecionado.
+ */
+interface OpcaoFiltro
+{
+    valor: Filtro;
+    rotulo: string;
+    descricao: string;
+}
+const FILTROS: OpcaoFiltro[] = [
+    { valor: 'todos', rotulo: 'Todos os clientes', descricao: 'Acompanhe o momento de cada cliente e encontre quem precisa de atenção.' },
+    { valor: 'voltar', rotulo: 'Precisam voltar', descricao: 'Clientes na hora de voltar, atrasados ou sumidos.' },
+    { valor: 'novos', rotulo: 'Novos', descricao: 'Clientes com uma única compra, ainda conhecendo sua loja.' },
+    { valor: 'emdia', rotulo: 'Em dia', descricao: 'Clientes dentro do seu ritmo habitual de compra.' },
+    { valor: 'perto', rotulo: 'Hora de voltar', descricao: 'A próxima compra está próxima ou dentro da margem de acompanhamento.' },
+    { valor: 'atrasado', rotulo: 'Atrasados', descricao: 'Clientes que passaram do intervalo habitual de compra.' },
+    { valor: 'sumido', rotulo: 'Sumidos', descricao: 'Clientes sem comprar pelo prazo configurado na loja.' },
+    { valor: 'retornou', rotulo: 'Retornaram', descricao: 'Clientes que voltaram por uma mensagem nos últimos 7 dias.' },
+];
 const PRECISA_VOLTAR: EstadoCliente[] = ['perto', 'atrasado', 'sumido'];
 /** Quem precisa de ação aparece primeiro. */
 const ORDEM: EstadoCliente[] = [
@@ -42,9 +85,19 @@ const ORDEM: EstadoCliente[] = [
     'emdia',
 ];
 
+function passaFiltro(s: Situacao, valor: Filtro, hoje: Dia): boolean
+{
+    if (valor === 'todos') return true;
+    if (valor === 'retornou') return retornou(s, hoje);
+    // O retorno substitui o selo do motor; os filtros acompanham o selo visível.
+    if (retornou(s, hoje)) return false;
+    if (valor === 'voltar') return PRECISA_VOLTAR.includes(s.est);
+    return s.est === (valor === 'novos' ? 'novo' : valor);
+}
+
 /**
  * @summary
- * Lista de clientes com busca e filtro por situação. Busca e filtro ficam na URL para sobreviver à navegação.
+ * Lista de clientes em lotes, com busca e filtro por situação preservados na navegação.
  *
  * @returns A tela Clientes.
  */
@@ -54,8 +107,10 @@ export function Clientes()
     const hoje = useHoje();
     const sits = useSituacoes(l, hoje);
     const [params, setParams] = useSearchParams();
-    const filtro = (params.get('filtro') as Filtro) || 'todos';
+    const opcao = FILTROS.find(f => f.valor === params.get('filtro')) ?? FILTROS[0];
+    const filtro = opcao.valor;
     const busca = params.get('q') ?? '';
+    const temFiltro = !!busca || filtro !== 'todos';
 
     function muda(k: string, v: string)
     {
@@ -69,10 +124,8 @@ export function Clientes()
     {
         const q = busca.trim().toLowerCase();
         const qd = soDigitos(q);
-        const passa = (s: Situacao) =>
-            filtro === 'todos' || (filtro === 'novos' ? s.est === 'novo' : PRECISA_VOLTAR.includes(s.est));
         return l.clientes
-            .filter(c => passa(sits.get(c.id)!))
+            .filter(c => passaFiltro(sits.get(c.id)!, filtro, hoje))
             .filter(c =>
                 !q
                 || c.nome.toLowerCase().includes(q)
@@ -83,7 +136,18 @@ export function Clientes()
                 const sb = sits.get(b.id)!;
                 return ORDEM.indexOf(sa.est) - ORDEM.indexOf(sb.est) || sb.desde - sa.desde;
             });
-    }, [l.clientes, sits, busca, filtro]);
+    }, [
+        l.clientes,
+        sits,
+        busca,
+        filtro,
+        hoje,
+    ]);
+    const lotes = useLotes(lista.length, JSON.stringify([l.id, 'clientes', filtro, busca]));
+    const contagens = new Map(FILTROS.map(f => [
+        f.valor,
+        l.clientes.filter(c => passaFiltro(sits.get(c.id)!, f.valor, hoje)).length,
+    ]));
 
     return (
         <div className="flex flex-col gap-3">
@@ -101,27 +165,71 @@ export function Clientes()
                 </Button>
             </header>
 
-            <InputGroup className="h-10 bg-card">
-                <InputGroupAddon>
-                    <Search />
-                </InputGroupAddon>
-                <InputGroupInput
-                    type="search"
-                    aria-label="Buscar cliente por nome, telefone ou CPF"
-                    placeholder="Buscar cliente"
-                    autoComplete="off"
-                    value={busca}
-                    onChange={e => muda('q', e.target.value)}
-                />
-            </InputGroup>
+            <Card className="py-4">
+                <CardContent className="flex flex-col gap-4 px-4">
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="busca-cliente">Buscar cliente</Label>
+                        <InputGroup className="h-11 bg-background/50">
+                            <InputGroupAddon><Search /></InputGroupAddon>
+                            <InputGroupInput
+                                id="busca-cliente"
+                                type="search"
+                                aria-label="Buscar cliente por nome, CPF ou número de telefone"
+                                placeholder="Nome, CPF ou número de telefone"
+                                autoComplete="off"
+                                value={busca}
+                                onChange={e => muda('q', e.target.value)}
+                            />
+                        </InputGroup>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="filtro-clientes">
+                            <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden />
+                            Filtrar clientes por status
+                        </Label>
+                        <Select value={filtro} onValueChange={v => muda('filtro', v === 'todos' ? '' : v)}>
+                            <SelectTrigger id="filtro-clientes" className="min-h-11 w-full bg-background/50">
+                                <SelectValue>{`${opcao.rotulo} (${contagens.get(filtro)})`}</SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {FILTROS.map(f => (
+                                    <SelectItem key={f.valor} value={f.valor}>
+                                        {`${f.rotulo} (${contagens.get(f.valor)})`}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </CardContent>
+            </Card>
 
-            <Tabs value={filtro} onValueChange={v => muda('filtro', v === 'todos' ? '' : v)}>
-                <TabsList className="w-full">
-                    <TabsTrigger value="todos">Todos</TabsTrigger>
-                    <TabsTrigger value="novos">Novos</TabsTrigger>
-                    <TabsTrigger value="voltar">Hora de voltar</TabsTrigger>
-                </TabsList>
-            </Tabs>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 pt-2">
+                <h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+                    <span className="truncate">{opcao.rotulo}</span>
+                    <Badge variant="secondary" className="tabular-nums">{lista.length}</Badge>
+                </h2>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn('min-h-11 shrink-0', !temFiltro && 'invisible')}
+                    disabled={!temFiltro}
+                    aria-hidden={!temFiltro}
+                    tabIndex={temFiltro ? undefined : -1}
+                    onClick={() =>
+                    {
+                        const p = new URLSearchParams(params);
+                        p.delete('q');
+                        p.delete('filtro');
+                        setParams(p, { replace: true });
+                    }}
+                >
+                    <X data-icon="inline-start" />
+                    Limpar
+                </Button>
+                <p className="col-span-2 line-clamp-2 h-8 text-xs leading-4 text-muted-foreground">
+                    {opcao.descricao}
+                </p>
+            </div>
 
             {lista.length === 0
                 ? (
@@ -133,14 +241,16 @@ export function Clientes()
                                 <EmptyTitle>
                                     {`Nenhum cliente ${busca ? 'encontrado' : 'nesta lista'}`}
                                 </EmptyTitle>
-                                <EmptyDescription>Tente outro nome, telefone ou filtro.</EmptyDescription>
+                                <EmptyDescription>
+                                    Tente outro nome, CPF, número de telefone ou status.
+                                </EmptyDescription>
                             </EmptyHeader>
                         </Empty>
                     )
                 : (
                         <Card className="py-1">
                             <ItemGroup className="gap-0">
-                                {lista.map((c, i) =>
+                                {lista.slice(0, lotes.exibidos).map((c, i) =>
                                 {
                                     const s = sits.get(c.id)!;
                                     const p = produtoDe(l.produtos, s.ultima.produtoId);
@@ -154,7 +264,7 @@ export function Clientes()
                                         <div key={c.id} role="listitem">
                                             {i > 0 && <ItemSeparator className="my-0" />}
                                             <Item asChild className="rounded-none px-4">
-                                                <Link to={`/clientes/${c.id}`}>
+                                                <Link to={`/clientes/${c.id}`} state={lotes.estadoDetalhe}>
                                                     <ItemMedia>
                                                         <Avatar size="lg">
                                                             <AvatarFallback>{iniciais(c.nome)}</AvatarFallback>
@@ -178,6 +288,18 @@ export function Clientes()
                             </ItemGroup>
                         </Card>
                     )}
+            {lista.length > 0 && (
+                <div className="flex flex-col gap-2">
+                    <p role="status" className="text-center text-xs text-muted-foreground">
+                        {`${lotes.exibidos} de ${lista.length} clientes`}
+                    </p>
+                    {lotes.temMais && (
+                        <Button variant="outline" size="lg" className="min-h-11 w-full" onClick={lotes.carregarMais}>
+                            Carregar mais clientes
+                        </Button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

@@ -28,6 +28,7 @@ import {
 } from '@/domain/formato';
 import { recompensaValida, valorACobrar } from '@/domain/mensagens';
 import type { Cliente } from '@/domain/tipos';
+import { useLotes } from '@/lib/listagem';
 import { useFregues, useHoje, useLoja } from '@/store/useFregues';
 
 type Modo = 'existente' | 'novo';
@@ -83,6 +84,7 @@ export function Vender()
                 || c.nome.toLowerCase().includes(q)
                 || (qd.length > 2 && (soDigitos(c.tel).includes(qd) || soDigitos(c.cpf ?? '').includes(qd))));
     }, [l.clientes, busca, inicial?.id]);
+    const lotes = useLotes(lista.length, JSON.stringify([l.id, 'vender', busca, modo]));
 
     const falta
         = modo === 'existente' && !cliente
@@ -158,7 +160,14 @@ export function Vender()
                     <CardTitle>Quem comprou?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Tabs value={modo} onValueChange={m => setModo(m as Modo)}>
+                    <Tabs
+                        value={modo}
+                        onValueChange={(m) =>
+                        {
+                            setModo(m as Modo);
+                            lotes.reiniciar();
+                        }}
+                    >
                         <TabsList className="w-full">
                             <TabsTrigger value="existente">Já é cliente</TabsTrigger>
                             <TabsTrigger value="novo">Cliente novo</TabsTrigger>
@@ -171,11 +180,15 @@ export function Vender()
                                 </InputGroupAddon>
                                 <InputGroupInput
                                     type="search"
-                                    aria-label="Buscar por nome, telefone ou CPF"
-                                    placeholder="Nome, telefone ou CPF"
+                                    aria-label="Buscar cliente por nome, CPF ou número de telefone"
+                                    placeholder="Nome, CPF ou número de telefone"
                                     autoComplete="off"
                                     value={busca}
-                                    onChange={e => setBusca(e.target.value)}
+                                    onChange={(e) =>
+                                    {
+                                        setBusca(e.target.value);
+                                        lotes.reiniciar();
+                                    }}
                                 />
                             </InputGroup>
                             <ScrollArea className="min-h-0 flex-1 rounded-lg">
@@ -183,7 +196,7 @@ export function Vender()
                                     ? <p className="py-10 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</p>
                                     : (
                                             <RadioGroup aria-label="Clientes" value={clienteId} onValueChange={escolher} className="gap-2">
-                                                {lista.map(c => (
+                                                {lista.slice(0, lotes.exibidos).map(c => (
                                                     <FieldLabel key={c.id} htmlFor={`cli-${c.id}`}>
                                                         <Field orientation="horizontal">
                                                             <FieldContent className="min-w-0">
@@ -197,6 +210,18 @@ export function Vender()
                                             </RadioGroup>
                                         )}
                             </ScrollArea>
+                            {lista.length > 0 && (
+                                <div className="flex flex-col gap-1">
+                                    <p role="status" className="text-center text-xs text-muted-foreground">
+                                        {`${lotes.exibidos} de ${lista.length} clientes`}
+                                    </p>
+                                    {lotes.temMais && (
+                                        <Button variant="outline" className="min-h-11 w-full" onClick={lotes.carregarMais}>
+                                            Carregar mais clientes
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
                         </TabsContent>
 
                         <TabsContent value="novo" className="mt-2 h-80">

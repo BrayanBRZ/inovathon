@@ -43,8 +43,9 @@ import {
 } from '@/domain/formato';
 import { recompensaValida, TIPO_MENSAGEM } from '@/domain/mensagens';
 import { ANTECEDENCIA, produtoDe, situacao } from '@/domain/recorrencia';
-import type { Dia } from '@/domain/tipos';
+import type { Cliente, Dia, Loja } from '@/domain/tipos';
 import { CLASSE_AVISO, iniciais, seloCliente } from '@/lib/estados';
+import { useLotes, useRetornoLista } from '@/lib/listagem';
 import { cn } from '@/lib/utils';
 import { useHoje, useLoja } from '@/store/useFregues';
 
@@ -88,9 +89,35 @@ export function ClienteDetalhe()
 {
     const { id } = useParams();
     const l = useLoja();
-    const hoje = useHoje();
     const c = l.clientes.find(x => x.id === id);
     if (!c) return <Navigate to="/clientes" replace />;
+    return <FichaCliente l={l} c={c} />;
+}
+
+/**
+ * @summary
+ * Propriedades da ficha de um cliente encontrado na loja atual.
+ *
+ * @property l - Loja atual, com seus produtos e mensagens.
+ * @property c - Cliente cuja situação e atividades serão exibidas.
+ */
+interface FichaClienteProps
+{
+    l: Loja;
+    c: Cliente;
+}
+
+/**
+ * @summary
+ * Exibe a situação do cliente e permite consultar seu histórico em lotes de quatro atividades.
+ *
+ * @param props - Loja e cliente da ficha.
+ * @returns Conteúdo da ficha e ações disponíveis para o cliente.
+ */
+function FichaCliente({ l, c }: FichaClienteProps)
+{
+    const hoje = useHoje();
+    const retorno = useRetornoLista('/clientes');
 
     const s = situacao(c, l.produtos, l.regraSumido, hoje);
     const rec = recompensaValida(c, hoje);
@@ -167,11 +194,12 @@ export function ClienteDetalhe()
             sub: TIPO_MENSAGEM[preparada],
         });
     }
+    const lotes = useLotes(eventos.length, JSON.stringify([l.id, 'historico', c.id]), 4, 4);
 
     return (
         <div className="flex flex-col gap-3">
             <Button asChild variant="ghost" className="-ml-2 self-start">
-                <Link to="/clientes">
+                <Link {...retorno}>
                     <ChevronLeft data-icon="inline-start" />
                     {' '}
                     Clientes
@@ -254,7 +282,7 @@ export function ClienteDetalhe()
                     </p>
 
                     <ItemGroup className="gap-0">
-                        {eventos.slice(0, 4).map(e => (
+                        {eventos.slice(0, lotes.exibidos).map(e => (
                             <Item key={e.chave} size="sm" className="px-0" role="listitem">
                                 <ItemMedia variant="icon">
                                     {e.compra ? <ShoppingBag /> : <MessageSquareText />}
@@ -266,6 +294,16 @@ export function ClienteDetalhe()
                             </Item>
                         ))}
                     </ItemGroup>
+                    {eventos.length > 0 && (
+                        <p role="status" className="text-center text-xs text-muted-foreground">
+                            {`${lotes.exibidos} de ${eventos.length} atividades`}
+                        </p>
+                    )}
+                    {lotes.temMais && (
+                        <Button variant="outline" className="min-h-11 w-full" onClick={lotes.carregarMais}>
+                            Ver mais atividades
+                        </Button>
+                    )}
                 </CardContent>
 
                 <CardFooter className="gap-2 border-t">

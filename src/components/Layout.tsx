@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Link, Outlet, useLocation } from 'react-router';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { Link, Outlet, useLocation, useNavigationType } from 'react-router';
 import {
     Gift,
     House,
@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
 import { iniciais } from '@/lib/estados';
+import type { EstadoListagem } from '@/lib/listagem';
 import { useFregues, useLoja } from '@/store/useFregues';
 
 /**
@@ -45,7 +46,7 @@ const MENU: ItemMenu[] = [
  * Estrutura comum das telas: cabeçalho, conteúdo, menu inferior e avisos (toasts).
  *
  * @remarks
- * Ao trocar de tela, volta ao topo e leva o foco ao conteúdo para que leitores de tela anunciem a nova página.
+ * Ao abrir uma tela, leva o foco ao conteúdo. O retorno pelo histórico ou pelo detalhe restaura a rolagem.
  * Também aplica a preferência "letra maior" na raiz do documento.
  *
  * @returns O layout com a tela atual no `Outlet`.
@@ -54,25 +55,62 @@ export function Layout()
 {
     const loja = useLoja();
     const letraGrande = useFregues(s => s.letraGrande);
-    const { pathname } = useLocation();
+    const location = useLocation();
+    const { pathname } = location;
+    const navigationType = useNavigationType();
     const main = useRef<HTMLElement>(null);
-    const primeira = useRef(true);
+    const posicoes = useRef(new Map<string, number>());
+    const anterior = useRef<{ pathname: string; lojaId: string } | null>(null);
 
     useEffect(() =>
     {
         document.documentElement.classList.toggle('letra-grande', letraGrande);
     }, [letraGrande]);
 
-    useEffect(() =>
+    useLayoutEffect(() =>
     {
-        if (primeira.current)
+        const restauracao = window.history.scrollRestoration;
+        window.history.scrollRestoration = 'manual';
+        return () =>
         {
-            primeira.current = false;
-            return;
+            window.history.scrollRestoration = restauracao;
+        };
+    }, []);
+
+    useLayoutEffect(() =>
+    {
+        const estado = location.state as EstadoListagem | null;
+        const mesmaTela = anterior.current?.pathname === pathname && anterior.current.lojaId === loja.id;
+        const chaveRetorno = navigationType === 'POP'
+            ? location.key
+            : navigationType === 'PUSH' ? estado?.restaurarRolagem : undefined;
+        const posicao = chaveRetorno ? posicoes.current.get(`${loja.id}:${chaveRetorno}`) : undefined;
+        const primeira = anterior.current === null;
+        if (!primeira)
+        {
+            window.scrollTo(0, posicao ?? (mesmaTela ? window.scrollY : 0));
+            if (!mesmaTela) main.current?.focus({ preventScroll: true });
         }
-        window.scrollTo(0, 0);
-        main.current?.focus({ preventScroll: true });
-    }, [pathname]);
+        anterior.current = { pathname, lojaId: loja.id };
+
+        // Registra durante a leitura, antes que a próxima tela reduza a altura do documento.
+        const guardar = () =>
+        {
+            posicoes.current.set(`${loja.id}:${location.key}`, window.scrollY);
+        };
+        guardar();
+        window.addEventListener('scroll', guardar, { passive: true });
+        return () =>
+        {
+            window.removeEventListener('scroll', guardar);
+        };
+    }, [
+        location.key,
+        location.state,
+        loja.id,
+        navigationType,
+        pathname,
+    ]);
 
     const ativo = (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to));
 

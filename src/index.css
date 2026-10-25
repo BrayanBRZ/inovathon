@@ -137,6 +137,7 @@
   }
   html {
     @apply font-sans;
+    scrollbar-gutter: stable;
   }
   /* "Letra maior" nos Ajustes: o layout usa rem e acompanha. */
   html.letra-grande {
