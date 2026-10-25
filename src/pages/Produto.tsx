@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { parseValor, valorParaCampo } from '@/domain/formato';
 import { novoId } from '@/domain/operacoes';
 import type { Produto as TProduto } from '@/domain/tipos';
+import { campoMascarado, mascaraValor } from '@/lib/mascaras';
 import { produtoEmUso, useFregues, useLoja } from '@/store/useFregues';
 
 /**
@@ -130,7 +131,13 @@ function Form({ inicial, novo }: FormProps)
                                     <InputGroupAddon>
                                         <InputGroupText>R$</InputGroupText>
                                     </InputGroupAddon>
-                                    <InputGroupInput id="p-preco" inputMode="decimal" className="tabular-nums" value={preco} onChange={e => setPreco(e.target.value)} />
+                                    <InputGroupInput
+                                        id="p-preco"
+                                        inputMode="decimal"
+                                        className="tabular-nums"
+                                        placeholder="0,00"
+                                        {...campoMascarado(preco, mascaraValor, setPreco)}
+                                    />
                                 </InputGroup>
                             </Field>
                             <Field>

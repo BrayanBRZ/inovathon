@@ -34,6 +34,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { brl, ddmm } from '@/domain/formato';
+import { campoMascarado, mascaraTelefone } from '@/lib/mascaras';
 import {
     MENSALIDADE,
     type Plano,
@@ -315,7 +316,13 @@ function MinhaLoja()
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="loja-tel">WhatsApp da loja</FieldLabel>
-                        <Input id="loja-tel" type="tel" inputMode="tel" value={d.tel} onChange={e => setD({ ...d, tel: e.target.value })} />
+                        <Input
+                            id="loja-tel"
+                            type="tel"
+                            inputMode="tel"
+                            placeholder="(44) 99999-0000"
+                            {...campoMascarado(d.tel, mascaraTelefone, tel => setD({ ...d, tel }))}
+                        />
                     </Field>
                     <Field className="col-span-2">
                         <FieldLabel htmlFor="loja-de">Nas mensagens: “Aqui é…”</FieldLabel>

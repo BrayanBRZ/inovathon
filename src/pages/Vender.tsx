@@ -28,6 +28,7 @@ import {
 } from '@/domain/formato';
 import { recompensaValida, valorACobrar } from '@/domain/mensagens';
 import type { Cliente } from '@/domain/tipos';
+import { campoMascarado, mascaraCpf, mascaraTelefone, mascaraValor } from '@/lib/mascaras';
 import { useLotes } from '@/lib/listagem';
 import { useFregues, useHoje, useLoja } from '@/store/useFregues';
 
@@ -239,13 +240,22 @@ export function Vender()
                                             inputMode="tel"
                                             autoComplete="off"
                                             placeholder="(44) 99999-0000"
-                                            value={novo.tel}
-                                            onChange={e => setNovo({ ...novo, tel: e.target.value })}
+                                            {...campoMascarado(
+                                                novo.tel,
+                                                mascaraTelefone,
+                                                tel => setNovo({ ...novo, tel }),
+                                            )}
                                         />
                                     </Field>
                                     <Field>
                                         <FieldLabel htmlFor="n-cpf">CPF (opcional)</FieldLabel>
-                                        <Input id="n-cpf" inputMode="numeric" autoComplete="off" value={novo.cpf} onChange={e => setNovo({ ...novo, cpf: e.target.value })} />
+                                        <Input
+                                            id="n-cpf"
+                                            inputMode="numeric"
+                                            autoComplete="off"
+                                            placeholder="000.000.000-00"
+                                            {...campoMascarado(novo.cpf, mascaraCpf, cpf => setNovo({ ...novo, cpf }))}
+                                        />
                                     </Field>
                                 </div>
                                 <Field orientation="horizontal">
@@ -305,8 +315,8 @@ export function Vender()
                                     inputMode="decimal"
                                     autoComplete="off"
                                     className="tabular-nums"
-                                    value={valor}
-                                    onChange={e => setValor(e.target.value)}
+                                    placeholder="0,00"
+                                    {...campoMascarado(valor, mascaraValor, setValor)}
                                 />
                             </InputGroup>
                         </Field>

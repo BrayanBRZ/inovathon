@@ -19,9 +19,16 @@ export function parseValor(txt: string): number
     return Number.isFinite(n) ? n : 0;
 }
 
+/**
+ * @summary
+ * Prepara um valor em reais para os campos monetários com máscara brasileira.
+ *
+ * @param v - Quantia em reais.
+ * @returns Valor com separador de milhares e duas casas decimais, sem R$.
+ */
 export function valorParaCampo(v: number): string
 {
-    return Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.', ',');
+    return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export function dias(n: number): string
