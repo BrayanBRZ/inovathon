@@ -217,7 +217,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                                     <CardContent className="px-3">
                                         <span className="sr-only">Loja: </span>
                                         <p className="whitespace-pre-wrap">{m.texto}</p>
-                                        <p className="mt-1 flex items-center justify-end gap-1 text-xs text-primary-foreground/70">
+                                        <p className="mt-1 flex items-center justify-end gap-1 text-xs text-primary-foreground">
                                             {m.hora}
                                             {' '}
                                             <CheckCheck className="size-3.5" aria-label="entregue" />

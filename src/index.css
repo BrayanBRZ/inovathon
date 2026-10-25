@@ -30,6 +30,13 @@
     --color-success: var(--success);
     --color-dock-foreground: var(--dock-foreground);
     --color-dock: var(--dock);
+    --shadow-surface: var(--surface-shadow);
+    --shadow-overlay: var(--overlay-shadow);
+    --color-primary-hover: var(--primary-hover);
+    --color-brand-surface: var(--brand-surface);
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+    --color-brand-hover: var(--brand-hover);
     --shadow-glass: var(--glass-shadow);
     --color-glass-border: var(--glass-border);
     --color-destructive: var(--destructive);
@@ -57,99 +64,105 @@
 }
 
 /*
- * Tema do Freguês sobre os tokens do shadcn/ui (paleta de .docs/color-design.md, ajustada para WCAG AA).
- * Cor só comunica estado: secondary = neutro (marinho acinzentado); warning = âmbar (hora de voltar, atrasado,
- * crédito); success = verde-azulado (voltou, gostou); destructive = vermelho (sumido, problema).
- * Vidro ("liquid glass"): card e popover translúcidos, com --glass-border (brilho da borda) e --glass-shadow.
- * Dock: o menu inferior flutuante.
+ * Identidade do Freguês: creme, marinho e verde, com superfícies sólidas.
+ * O verde original da marca fica em brand; primary usa uma variação mais escura para texto branco.
+ * warning, success e destructive preservam o significado dos estados, acompanhados de seus rótulos.
+ * Os aliases glass mantêm as telas ainda não migradas compatíveis com as novas superfícies.
  */
 :root {
-    --background: #F4F3EF;
+    --background: #F7F4EB;
     --foreground: #14213D;
-    --card: rgb(255 255 255 / 0.62);
+    --card: #FFFFFF;
     --card-foreground: #14213D;
-    --popover: rgb(255 255 255 / 0.78);
+    --popover: #FFFFFF;
     --popover-foreground: #14213D;
-    --primary: #14213D;
+    --primary: #087F6B;
     --primary-foreground: #FFFFFF;
-    --secondary: rgb(20 33 61 / 0.07);
+    --primary-hover: #066957;
+    --brand-surface: #F7F4EB;
+    --brand: #16A085;
+    --brand-foreground: #14213D;
+    --brand-hover: #20B598;
+    --secondary: #E7EFEC;
     --secondary-foreground: #14213D;
-    --muted: rgb(20 33 61 / 0.05);
-    --muted-foreground: #5A6377;
-    --accent: rgb(20 33 61 / 0.06);
-    --accent-foreground: #14213D;
+    --muted: #F0F2EE;
+    --muted-foreground: #4A5570;
+    --accent: #E3F1EC;
+    --accent-foreground: #075E50;
     --destructive: #B3261E;
     --warning: #FBF0D0;
     --warning-foreground: #6B4E00;
     --success: #E3F1EC;
     --success-foreground: #0D6E5C;
-    --border: rgb(20 33 61 / 0.09);
-    --input: rgb(20 33 61 / 0.14);
-    --ring: #3B5584;
-    --chart-1: #3B5584;
+    --border: #DCE5DF;
+    --input: #7D8D87;
+    --ring: #087F6B;
+    --chart-1: #087F6B;
     --chart-2: #14213D;
     --chart-3: #F2C14E;
     --chart-4: #0D6E5C;
-    --chart-5: #A9B4C8;
+    --chart-5: #4A5570;
     --radius: 1rem;
-    --glass-border: rgb(255 255 255 / 0.7);
-    --glass-shadow: 0 1px 2px rgb(20 33 61 / 0.04), 0 8px 24px -12px rgb(20 33 61 / 0.12);
-    --dock: rgb(20 33 61 / 0.88);
+    --surface-shadow: 0 2px 4px -2px rgb(20 33 61 / 0.06), 0 8px 20px -16px rgb(20 33 61 / 0.14);
+    --overlay-shadow: 0 4px 12px -4px rgb(20 33 61 / 0.12), 0 16px 32px -12px rgb(20 33 61 / 0.2);
+    --glass-border: var(--border);
+    --glass-shadow: var(--surface-shadow);
+    --dock: #14213D;
     --dock-foreground: #FFFFFF;
-    --glow-1: rgb(59 85 132 / 0.10);
-    --glow-2: rgb(13 110 92 / 0.06);
     --sidebar: #FFFFFF;
     --sidebar-foreground: #14213D;
-    --sidebar-primary: #14213D;
+    --sidebar-primary: #087F6B;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F1EFE8;
-    --sidebar-accent-foreground: #14213D;
-    --sidebar-border: #E4E2DA;
-    --sidebar-ring: #3B5584;
+    --sidebar-accent: #E3F1EC;
+    --sidebar-accent-foreground: #075E50;
+    --sidebar-border: #DCE5DF;
+    --sidebar-ring: #087F6B;
 }
 
 .dark {
-    --background: #0B1120;
-    --foreground: #EEF1F6;
-    --card: rgb(30 42 68 / 0.45);
-    --card-foreground: #EEF1F6;
-    --popover: rgb(23 32 54 / 0.85);
-    --popover-foreground: #EEF1F6;
-    --primary: #E9EEF5;
-    --primary-foreground: #0F1626;
-    --secondary: rgb(233 238 245 / 0.08);
-    --secondary-foreground: #DCE3EE;
-    --muted: rgb(233 238 245 / 0.06);
-    --muted-foreground: #A9B4C8;
-    --accent: rgb(233 238 245 / 0.08);
-    --accent-foreground: #EEF1F6;
+    --background: #10192B;
+    --foreground: #F7F4EB;
+    --card: #19263B;
+    --card-foreground: #F7F4EB;
+    --popover: #1E2E43;
+    --popover-foreground: #F7F4EB;
+    --primary: #6FDCBF;
+    --primary-foreground: #14213D;
+    --primary-hover: #94E6D0;
+    --brand: #6FDCBF;
+    --brand-foreground: #14213D;
+    --brand-hover: #94E6D0;
+    --secondary: #26384A;
+    --secondary-foreground: #E3EEEA;
+    --muted: #223147;
+    --muted-foreground: #B6C4D1;
+    --accent: #23483F;
+    --accent-foreground: #A0E7D4;
     --destructive: #FF8A80;
-    --warning: rgb(242 193 78 / 0.14);
-    --warning-foreground: #F2C14E;
-    --success: rgb(111 220 191 / 0.12);
-    --success-foreground: #6FDCBF;
-    --border: rgb(233 238 245 / 0.08);
-    --input: rgb(233 238 245 / 0.14);
-    --ring: #8DB7F2;
-    --chart-1: #8DB7F2;
-    --chart-2: #E9EEF5;
+    --warning: #44381F;
+    --warning-foreground: #F7D57E;
+    --success: #183F38;
+    --success-foreground: #8FE4CD;
+    --border: #344558;
+    --input: #7B8B9E;
+    --ring: #6FDCBF;
+    --chart-1: #6FDCBF;
+    --chart-2: #B6C4D1;
     --chart-3: #F2C14E;
-    --chart-4: #6FDCBF;
-    --chart-5: #A9B4C8;
-    --glass-border: rgb(255 255 255 / 0.08);
-    --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 12px 32px -12px rgb(0 0 0 / 0.5);
-    --dock: rgb(30 42 68 / 0.72);
-    --dock-foreground: #EEF1F6;
-    --glow-1: rgb(141 183 242 / 0.08);
-    --glow-2: rgb(111 220 191 / 0.05);
-    --sidebar: #172036;
-    --sidebar-foreground: #EEF1F6;
-    --sidebar-primary: #E9EEF5;
-    --sidebar-primary-foreground: #0F1626;
-    --sidebar-accent: #1E2A44;
-    --sidebar-accent-foreground: #EEF1F6;
-    --sidebar-border: #26324A;
-    --sidebar-ring: #8DB7F2;
+    --chart-4: #8DB7F2;
+    --chart-5: #D7A6CA;
+    --surface-shadow: 0 2px 6px -2px rgb(0 0 0 / 0.16);
+    --overlay-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.4);
+    --dock: #19263B;
+    --dock-foreground: #F7F4EB;
+    --sidebar: #19263B;
+    --sidebar-foreground: #F7F4EB;
+    --sidebar-primary: #6FDCBF;
+    --sidebar-primary-foreground: #14213D;
+    --sidebar-accent: #23483F;
+    --sidebar-accent-foreground: #A0E7D4;
+    --sidebar-border: #344558;
+    --sidebar-ring: #6FDCBF;
 }
 
 @layer base {
@@ -158,12 +171,6 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    /* Brilhos suaves no fundo: dão ao desfoque das superfícies de vidro algo para refratar. */
-    background-image:
-      radial-gradient(60rem 40rem at 110% -10%, var(--glow-1), transparent 60%),
-      radial-gradient(50rem 36rem at -20% 40%, var(--glow-2), transparent 60%),
-      radial-gradient(40rem 30rem at 100% 100%, var(--glow-1), transparent 60%);
-    background-attachment: fixed;
   }
   html {
     @apply font-sans;

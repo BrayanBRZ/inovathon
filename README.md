@@ -39,8 +39,8 @@ Arquivos gerados (`dist/` e `coverage/`), instruções em `.agents/`, documentos
 | `src/lib/estados.ts` | Mapa único de estado → tom (neutro, atenção, positivo, problema): variante de `Badge`, classes de superfície e texto; iniciais do `Avatar`; situação dos clientes |
 | `src/store/useFregues.ts` | Estado (zustand), salvo no `localStorage`. É aqui que entra a API C# na versão real |
 | `src/pages/` | Hoje, Clientes (+ ficha), Mensagens (+ conversa), Recompensas, Nova venda, Ajustes (+ produto). Sem janelas sobrepostas: cada ação abre uma página, e as confirmações aparecem como avisos (toasts) |
-| `src/components/ui/` | Componentes oficiais do shadcn/ui com ajustes de tema nas classes base: superfícies de vidro (Card, Select, Tabs, campos, toasts) e variantes `warning`/`success` em `Badge` e `Alert`. As telas usam apenas eles (regra do `AGENTS.md`) |
-| `src/index.css` | Tema: tokens do shadcn com o marinho de `.docs/color-design.md`, tokens extras `warning`, `success`, `glass-*` e `dock`, e brilhos suaves no fundo para o efeito de vidro |
+| `src/components/ui/` | Componentes oficiais do shadcn/ui com ajustes de tema nas classes base: superfícies sólidas, bordas discretas, sombras leves e variantes `warning`/`success` em `Badge` e `Alert`. As telas usam apenas eles (regra do `AGENTS.md`) |
+| `src/index.css` | Tema claro e escuro: creme, marinho e verde das referências de marca; verde escurecido para ações no tema claro; tokens de estado, sombras e menu. Os aliases `glass-*` mantêm compatibilidade com telas ainda não migradas |
 
 ## Regras do motor
 
