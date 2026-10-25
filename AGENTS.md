@@ -13,6 +13,14 @@ Estas regras se aplicam a toda a aplicação.
 
 A interface deve priorizar design para dispositivos móveis.
 
+## Estabilidade visual
+
+- Não permitir "pops": saltos abruptos de posição, largura ou altura ao trocar filtros, abas ou estados de carregamento.
+- Reservar espaço para ações condicionais, contagens e textos auxiliares, mantendo estáveis os controles e o início dos resultados. O aparecimento de "Limpar" ou uma descrição maior não pode empurrar a lista.
+- Evitar deslocamentos horizontais quando a barra de rolagem aparece ou desaparece.
+- Mudanças na quantidade de resultados podem alterar o tamanho da lista, mas não devem reposicionar os elementos anteriores nem causar rolagem inesperada.
+- Verificar essa estabilidade em telas móveis, com e sem resultados e com a preferência de letra maior. Não mascarar saltos com animações ou transições.
+
 ## Stack obrigatória
 
 - **React** para construir a aplicação e compor as telas.
