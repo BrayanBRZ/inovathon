@@ -132,7 +132,7 @@ export function Layout()
     return (
         <div className="min-h-dvh">
             <header className="sticky top-0 z-30 border-b bg-background pt-[env(safe-area-inset-top)]">
-                <div className="mx-auto flex h-20 max-w-lg items-center gap-3 px-4">
+                <div className="mx-auto flex h-16 max-w-lg items-center gap-3 px-4">
                     <Link
                         to="/"
                         aria-label="Freguês · Início"
@@ -160,11 +160,15 @@ export function Layout()
                     </Badge>
                     <Button
                         asChild
-                        variant="ghost"
+                        variant={pathname === '/ajustes' ? 'default' : 'ghost'}
                         size="icon-lg"
                         className="rounded-full"
                     >
-                        <Link to="/ajustes" aria-label="Configurações">
+                        <Link
+                            to="/ajustes"
+                            aria-label="Configurações"
+                            aria-current={pathname === '/ajustes' ? 'page' : undefined}
+                        >
                             <Settings className="size-5" aria-hidden />
                         </Link>
                     </Button>
