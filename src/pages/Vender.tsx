@@ -143,15 +143,15 @@ export function Vender()
 
     return (
         <div className="flex flex-col gap-3">
-            <Button asChild variant="ghost" className="-ml-2 self-start">
+            <Button asChild variant="ghost" size="sm" className="-ml-2 self-start text-muted-foreground">
                 <Link to={voltarPara}>
                     <ChevronLeft data-icon="inline-start" />
                     {' '}
                     Voltar
                 </Link>
             </Button>
-            <header className="mb-2">
-                <h1 className="font-heading text-2xl font-semibold tracking-tight">Nova venda</h1>
+            <header className="mb-1">
+                <h1 className="font-heading text-xl font-semibold tracking-tight">Nova venda</h1>
                 <p className="text-sm text-muted-foreground">O Freguês cuida do comprovante e do convite para voltar.</p>
             </header>
 
@@ -216,7 +216,7 @@ export function Vender()
                                         {`${lotes.exibidos} de ${lista.length} clientes`}
                                     </p>
                                     {lotes.temMais && (
-                                        <Button variant="outline" className="min-h-11 w-full" onClick={lotes.carregarMais}>
+                                        <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={lotes.carregarMais}>
                                             Carregar mais clientes
                                         </Button>
                                     )}

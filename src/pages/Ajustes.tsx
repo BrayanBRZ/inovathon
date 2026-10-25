@@ -66,8 +66,8 @@ export function Ajustes()
 
     return (
         <div className="flex flex-col gap-3">
-            <header className="mb-2">
-                <h1 className="font-heading text-2xl font-semibold tracking-tight">Ajustes</h1>
+            <header className="mb-1">
+                <h1 className="font-heading text-xl font-semibold tracking-tight">Ajustes</h1>
                 <p className="text-sm text-muted-foreground">Loja, produtos e preferências.</p>
             </header>
 

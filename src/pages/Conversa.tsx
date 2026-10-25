@@ -152,7 +152,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
 
     return (
         <div className="flex flex-col gap-3">
-            <Button asChild variant="ghost" className="-ml-2 self-start">
+            <Button asChild variant="ghost" size="sm" className="-ml-2 self-start text-muted-foreground">
                 <Link {...retorno}>
                     <ChevronLeft data-icon="inline-start" />
                     {' '}
@@ -163,7 +163,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
             <Card className="gap-0 pb-0">
                 <CardHeader className="border-b">
                     <div className="flex min-w-0 items-center gap-3">
-                        <Avatar size="lg">
+                        <Avatar>
                             <AvatarFallback>{iniciais(c.nome)}</AvatarFallback>
                         </Avatar>
                         <Link to={`/clientes/${c.id}`} className="min-w-0">
@@ -174,11 +174,11 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                         </Link>
                     </div>
                     <CardAction>
-                        <Badge variant="secondary">Simulação</Badge>
+                        <Badge variant="outline" className="text-muted-foreground">Simulação</Badge>
                     </CardAction>
                 </CardHeader>
 
-                <CardContent className="bg-muted/50 py-4">
+                <CardContent className="bg-muted/40 py-4">
                     {msgs.length > 0 && (
                         <div className="mb-3 flex flex-col gap-2">
                             <p role="status" className="text-center text-xs text-muted-foreground">
@@ -186,8 +186,9 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                             </p>
                             {lotes.temMais && (
                                 <Button
-                                    variant="outline"
-                                    className="min-h-11 w-full"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full text-muted-foreground"
                                     onClick={() =>
                                     {
                                         const elemento = historico.current?.firstElementChild;
@@ -210,21 +211,21 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                         {visiveis.map((m, i) => (
                             <li key={m.id} className="flex flex-col gap-2">
                                 {(i === 0 || visiveis[i - 1].data !== m.data) && (
-                                    <Badge variant="outline" className="self-center bg-card">{quando(m.data, hoje)}</Badge>
+                                    <Badge variant="secondary" className="self-center text-muted-foreground">{quando(m.data, hoje)}</Badge>
                                 )}
-                                <Card size="sm" className="ml-10 max-w-[85%] gap-1 self-end rounded-br-sm bg-secondary py-2.5 text-foreground ring-0">
+                                <Card size="sm" className="ml-10 max-w-[85%] gap-1 self-end rounded-br-md bg-primary py-2.5 text-primary-foreground shadow-none ring-0">
                                     <CardContent className="px-3">
                                         <span className="sr-only">Loja: </span>
                                         <p className="whitespace-pre-wrap">{m.texto}</p>
-                                        <p className="mt-1 flex items-center justify-end gap-1 text-xs text-muted-foreground">
+                                        <p className="mt-1 flex items-center justify-end gap-1 text-xs text-primary-foreground/70">
                                             {m.hora}
                                             {' '}
-                                            <CheckCheck className="size-3.5 text-chart-1" aria-label="entregue" />
+                                            <CheckCheck className="size-3.5" aria-label="entregue" />
                                         </p>
                                     </CardContent>
                                 </Card>
                                 {m.resposta && (
-                                    <Card size="sm" className="mr-10 max-w-[85%] gap-1 self-start rounded-bl-sm py-2.5">
+                                    <Card size="sm" className="mr-10 max-w-[85%] gap-1 self-start rounded-bl-md py-2.5">
                                         <CardContent className="px-3">
                                             <span className="sr-only">Cliente: </span>
                                             <p className="whitespace-pre-wrap">{m.resposta.texto}</p>
@@ -236,10 +237,10 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                         ))}
                         {preparada && (
                             <li className="flex flex-col gap-2">
-                                {ultima?.data !== hoje && <Badge variant="outline" className="self-center bg-card">Hoje</Badge>}
-                                <Card size="sm" className="ml-10 max-w-[85%] gap-1 self-end rounded-br-sm border border-dashed border-chart-1 py-2.5 ring-0">
+                                {ultima?.data !== hoje && <Badge variant="secondary" className="self-center text-muted-foreground">Hoje</Badge>}
+                                <Card size="sm" className="ml-10 max-w-[85%] gap-1 self-end rounded-br-md border border-dashed border-primary/40 py-2.5 shadow-none ring-0">
                                     <CardHeader className="px-3">
-                                        <CardDescription className="text-xs font-medium text-secondary-foreground">
+                                        <CardDescription className="text-xs font-medium">
                                             {l.auto ? 'Programada · sai às 9h' : 'Preparada · aguardando você'}
                                         </CardDescription>
                                     </CardHeader>
@@ -274,7 +275,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
             </Card>
 
             {problema && (
-                <Alert variant="destructive" className="bg-card">
+                <Alert variant="destructive">
                     <TriangleAlert />
                     <AlertTitle>Cliente teve um problema</AlertTitle>
                     <AlertDescription>Resolva antes de perder o cliente.</AlertDescription>
@@ -295,7 +296,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
             )}
             {!preparada && !problema && ultima?.status === 'respondeu' && (
                 <>
-                    <Alert className="bg-card">
+                    <Alert variant="success">
                         <CircleCheck />
                         <AlertTitle>Cliente respondeu ao lembrete</AlertTitle>
                         <AlertDescription>Registre a compra quando ele vier.</AlertDescription>
@@ -310,7 +311,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                 </>
             )}
             {!preparada && !problema && (ultima?.status === 'voltou' || ultima?.status === 'gostei') && (
-                <Alert className="bg-card">
+                <Alert variant="success">
                     {ultima.status === 'voltou' ? <CircleCheck /> : <ThumbsUp />}
                     <AlertTitle>
                         {ultima.status === 'voltou' ? `Voltou e comprou ${brl(ultima.valorVolta ?? 0)}` : 'Cliente gostou da compra'}
@@ -318,7 +319,7 @@ function ConversaCliente({ l, c }: ConversaClienteProps)
                 </Alert>
             )}
             {!preparada && !problema && aguardando && (
-                <Card size="sm" className="border border-dashed ring-0">
+                <Card size="sm" className="border border-dashed border-border shadow-none ring-0">
                     <CardHeader>
                         <CardDescription>
                             {`Demonstração: simule a resposta de ${c.chamar}`}

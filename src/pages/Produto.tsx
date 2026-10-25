@@ -87,15 +87,15 @@ function Form({ inicial, novo }: FormProps)
 
     return (
         <div className="flex flex-col gap-3">
-            <Button asChild variant="ghost" className="-ml-2 self-start">
+            <Button asChild variant="ghost" size="sm" className="-ml-2 self-start text-muted-foreground">
                 <Link to="/ajustes">
                     <ChevronLeft data-icon="inline-start" />
                     {' '}
                     Ajustes
                 </Link>
             </Button>
-            <header className="mb-2">
-                <h1 className="font-heading text-2xl font-semibold tracking-tight">{novo ? 'Novo produto' : 'Editar produto'}</h1>
+            <header className="mb-1">
+                <h1 className="font-heading text-xl font-semibold tracking-tight">{novo ? 'Novo produto' : 'Editar produto'}</h1>
                 <p className="text-sm text-muted-foreground">Preço, prazo de recompra e o que o Freguês diz ao cliente.</p>
             </header>
 

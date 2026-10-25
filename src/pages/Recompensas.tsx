@@ -33,7 +33,7 @@ import { Switch } from '@/components/ui/switch';
 import { brl, ddmm, somarDias } from '@/domain/formato';
 import { premioTxt } from '@/domain/mensagens';
 import type { Regra, TipoRecompensa } from '@/domain/tipos';
-import { CLASSE_AVISO } from '@/lib/estados';
+import { TOM_SUPERFICIE } from '@/lib/estados';
 import { cn } from '@/lib/utils';
 import { useFregues, useHoje, useLoja } from '@/store/useFregues';
 
@@ -57,8 +57,8 @@ export function Recompensas()
     const l = useLoja();
     return (
         <div className="flex flex-col gap-3">
-            <header className="mb-2">
-                <h1 className="font-heading text-2xl font-semibold tracking-tight">Recompensas</h1>
+            <header className="mb-1">
+                <h1 className="font-heading text-xl font-semibold tracking-tight">Recompensas</h1>
                 <p className="text-sm text-muted-foreground">Um motivo a mais para voltar.</p>
             </header>
 
@@ -77,7 +77,7 @@ export function Recompensas()
                 regra={l.regraSumido}
             />
 
-            <Item variant="outline" className="bg-card">
+            <Item variant="outline" className="border-glass-border bg-card shadow-glass backdrop-blur-xl">
                 <ItemMedia variant="icon">
                     <TrendingUp />
                 </ItemMedia>
@@ -87,7 +87,7 @@ export function Recompensas()
                 </ItemContent>
             </Item>
 
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="ghost" size="sm" className="w-full text-muted-foreground">
                 <Link to="/ajustes#demo">
                     <SlidersHorizontal data-icon="inline-start" />
                     {' '}
@@ -275,7 +275,7 @@ function Previa({ qual, r }: { qual: Qual; r: Regra })
         : 'Na sua próxima compra. Válido por 30 dias';
 
     return (
-        <Item variant="muted" className={cn('h-24', r.ativa && CLASSE_AVISO)}>
+        <Item variant="muted" data-tom={r.ativa ? 'warning' : undefined} className={cn('h-24', r.ativa && TOM_SUPERFICIE.warning)}>
             <ItemMedia variant="icon">
                 <Gift />
             </ItemMedia>

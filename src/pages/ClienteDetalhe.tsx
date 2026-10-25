@@ -44,7 +44,13 @@ import {
 import { recompensaValida, TIPO_MENSAGEM } from '@/domain/mensagens';
 import { ANTECEDENCIA, produtoDe, situacao } from '@/domain/recorrencia';
 import type { Cliente, Dia, Loja } from '@/domain/tipos';
-import { CLASSE_AVISO, iniciais, seloCliente } from '@/lib/estados';
+import {
+    iniciais,
+    seloCliente,
+    type Tom,
+    TOM_SUPERFICIE,
+    TOM_TEXTO,
+} from '@/lib/estados';
 import { useLotes, useRetornoLista } from '@/lib/listagem';
 import { cn } from '@/lib/utils';
 import { useHoje, useLoja } from '@/store/useFregues';
@@ -134,15 +140,13 @@ function FichaCliente({ l, c }: FichaClienteProps)
     const selo = seloCliente(s, hoje);
     const diasRecompra = s.proxima ? diasEntre(hoje, s.proxima) : null;
     const IconeRecompra = diasRecompra === null ? AlarmClockOff : diasRecompra < 0 ? ClockAlert : Clock;
-    const corRecompra = diasRecompra === null
-        ? 'text-muted-foreground'
+    // Mesmo tom do selo: vencida e sumido = perda; vencida ou próxima = atenção; distante = no ritmo.
+    const tomRecompra: Tom | null = diasRecompra === null
+        ? null
         : s.est === 'sumido' && diasRecompra < 0
-            ? 'text-destructive'
-            : diasRecompra < 0
-                ? 'text-orange-700 dark:text-orange-300'
-                : diasRecompra <= ANTECEDENCIA
-                    ? 'text-warning-foreground'
-                    : 'text-secondary-foreground';
+            ? 'destructive'
+            : diasRecompra <= ANTECEDENCIA ? 'warning' : 'success';
+    const corRecompra = tomRecompra ? TOM_TEXTO[tomRecompra] : 'text-muted-foreground';
     const descricaoRecompra = diasRecompra === null
         ? 'Disponível após compras em dias diferentes.'
         : diasRecompra < 0
@@ -198,7 +202,7 @@ function FichaCliente({ l, c }: FichaClienteProps)
 
     return (
         <div className="flex flex-col gap-3">
-            <Button asChild variant="ghost" className="-ml-2 self-start">
+            <Button asChild variant="ghost" size="sm" className="-ml-2 self-start text-muted-foreground">
                 <Link {...retorno}>
                     <ChevronLeft data-icon="inline-start" />
                     {' '}
@@ -220,12 +224,12 @@ function FichaCliente({ l, c }: FichaClienteProps)
                         </div>
                     </div>
                     <CardAction>
-                        <Badge variant={selo.variant} className={cn('w-24', selo.className)}>{selo.rotulo}</Badge>
+                        <Badge variant={selo.variant} className="w-24">{selo.rotulo}</Badge>
                     </CardAction>
                 </CardHeader>
 
                 <CardContent className="flex flex-col gap-3">
-                    <Item variant="muted" className={cn(rec && CLASSE_AVISO)}>
+                    <Item variant="muted" data-tom={rec ? 'warning' : undefined} className={cn(rec && TOM_SUPERFICIE.warning)}>
                         <ItemMedia variant="icon">
                             <Gift />
                         </ItemMedia>
@@ -247,24 +251,15 @@ function FichaCliente({ l, c }: FichaClienteProps)
                     </Item>
 
                     <div className="grid grid-cols-2 gap-3">
-                        <Item variant="outline">
+                        <Item variant="muted">
                             <ItemContent>
                                 <ItemDescription>{s.aprendido ? 'Intervalo médio' : 'Prazo do produto'}</ItemDescription>
                                 <ItemTitle>{dias(s.media)}</ItemTitle>
                             </ItemContent>
                         </Item>
-                        <Item
-                            variant="outline"
-                            className={cn(
-                                diasRecompra === null
-                                    ? 'bg-muted/40'
-                                    : diasRecompra < 0
-                                        ? s.est === 'sumido' ? 'bg-destructive/5' : 'bg-orange-50 dark:bg-orange-950/20'
-                                        : diasRecompra <= ANTECEDENCIA ? 'bg-warning/40' : 'bg-secondary/40',
-                            )}
-                        >
+                        <Item variant="muted" className={cn(tomRecompra && TOM_SUPERFICIE[tomRecompra])}>
                             <ItemContent>
-                                <ItemDescription>Estimativa de recompra</ItemDescription>
+                                <ItemDescription className={cn(tomRecompra && 'text-current opacity-80')}>Estimativa de recompra</ItemDescription>
                                 <ItemTitle className={cn('min-h-5', corRecompra)}>
                                     {s.proxima ? ddmm(s.proxima) : 'Sem estimativa'}
                                     <IconeRecompra
@@ -289,7 +284,7 @@ function FichaCliente({ l, c }: FichaClienteProps)
                                 </ItemMedia>
                                 <ItemContent className="min-w-0">
                                     <ItemTitle className="w-full truncate">{e.titulo}</ItemTitle>
-                                    <ItemDescription className="line-clamp-1">{e.sub}</ItemDescription>
+                                    <ItemDescription className="line-clamp-1 text-xs">{e.sub}</ItemDescription>
                                 </ItemContent>
                             </Item>
                         ))}
@@ -300,7 +295,7 @@ function FichaCliente({ l, c }: FichaClienteProps)
                         </p>
                     )}
                     {lotes.temMais && (
-                        <Button variant="outline" className="min-h-11 w-full" onClick={lotes.carregarMais}>
+                        <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={lotes.carregarMais}>
                             Ver mais atividades
                         </Button>
                     )}

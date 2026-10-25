@@ -3,6 +3,7 @@ import { ptBR } from 'date-fns/locale';
 import { Link } from 'react-router';
 import { Bar, BarChart, XAxis, YAxis } from 'recharts';
 import {
+    ChevronRight,
     Clock,
     Gift,
     MessageSquareText,
@@ -43,7 +44,7 @@ import { brl, dias } from '@/domain/formato';
 import { recompensaValida, TIPO_MENSAGEM } from '@/domain/mensagens';
 import { numerosDaLoja, serieRecuperado } from '@/domain/resultados';
 import type { Cliente, Recompensa, Situacao, TipoMensagem } from '@/domain/tipos';
-import { CLASSE_AVISO, iniciais, SELO_TIPO } from '@/lib/estados';
+import { iniciais, SELO_TIPO, type Tom, TOM_SUPERFICIE } from '@/lib/estados';
 import { cn } from '@/lib/utils';
 import { MENSALIDADE, useFregues, useHoje, useLoja } from '@/store/useFregues';
 
@@ -102,11 +103,11 @@ export function Hoje()
 
     return (
         <div className="flex flex-col gap-3">
-            <header className="mb-2">
+            <header className="mb-1">
                 <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                     {format(parseISO(hoje), 'EEEE, d \'de\' MMMM', { locale: ptBR })}
                 </p>
-                <h1 className="font-heading text-2xl font-semibold tracking-tight">
+                <h1 className="font-heading text-xl font-semibold tracking-tight">
                     {`${saudacao()}, ${l.dono.split(' ')[0]}`}
                 </h1>
                 <p className="text-sm text-muted-foreground">Veja quem chamar hoje.</p>
@@ -115,20 +116,16 @@ export function Hoje()
             <Card>
                 <CardHeader>
                     <CardDescription>
-                        Compras após os lembretes ·
-                        {format(parseISO(hoje), 'MMMM/yyyy', { locale: ptBR })}
+                        {`Compras após os lembretes · ${format(parseISO(hoje), 'MMMM', { locale: ptBR })}`}
                     </CardDescription>
-                    <CardTitle className="text-3xl font-semibold tabular-nums">{brl(n.recuperado)}</CardTitle>
+                    <CardTitle className="text-3xl font-semibold tracking-tight tabular-nums">{brl(n.recuperado)}</CardTitle>
                     <CardAction>
-                        <Badge variant="secondary">
-                            {vezes}
-                            × a mensalidade
-                        </Badge>
+                        <Badge variant="success">{`${vezes}× a mensalidade`}</Badge>
                     </CardAction>
                 </CardHeader>
                 <CardContent>
-                    <p className="mb-2 text-xs text-muted-foreground">Valor cobrado no mês · gráfico dos últimos 7 dias</p>
-                    <ChartContainer config={configGrafico} className="aspect-auto h-28 w-full">
+                    <p className="mb-2 text-xs text-muted-foreground">Últimos 7 dias</p>
+                    <ChartContainer config={configGrafico} className="aspect-auto h-24 w-full">
                         <BarChart accessibilityLayer data={serie} margin={{ left: 0, right: 0, top: 4 }}>
                             <XAxis dataKey="rotulo" tickLine={false} axisLine={false} tickMargin={8} />
                             <YAxis hide domain={[0, 'dataMax']} />
@@ -136,33 +133,30 @@ export function Hoje()
                                 cursor={false}
                                 content={<ChartTooltipContent formatter={v => brl(Number(v))} />}
                             />
-                            <Bar dataKey="valor" fill="var(--color-valor)" radius={[4, 4, 0, 0]} maxBarSize={24} />
+                            <Bar dataKey="valor" fill="var(--color-valor)" radius={6} maxBarSize={20} minPointSize={4} isAnimationActive={false} />
                         </BarChart>
                     </ChartContainer>
                 </CardContent>
             </Card>
 
             <div className="grid grid-cols-2 gap-3">
-                <Card>
+                <Card size="sm">
                     <CardHeader>
-                        <CardDescription>Voltaram neste mês</CardDescription>
-                        <CardTitle className="text-2xl font-semibold tabular-nums">{n.voltaram}</CardTitle>
-                        <CardDescription className="min-h-8 text-xs">Clientes distintos</CardDescription>
+                        <CardDescription className="text-xs">Voltaram no mês</CardDescription>
+                        <CardTitle className="text-2xl! font-semibold tracking-tight tabular-nums">{n.voltaram}</CardTitle>
+                        <CardDescription className="text-xs">Clientes distintos</CardDescription>
                     </CardHeader>
                 </Card>
-                <Card>
+                <Card size="sm">
                     <CardHeader>
-                        <CardDescription>Fizeram a 2ª compra</CardDescription>
-                        <CardTitle className="text-2xl font-semibold tabular-nums">
-                            {taxa}
-                            %
-                        </CardTitle>
-                        <CardDescription className="min-h-8 text-xs">{`${n.segunda} de ${n.novos} clientes da base`}</CardDescription>
+                        <CardDescription className="text-xs">Fizeram a 2ª compra</CardDescription>
+                        <CardTitle className="text-2xl! font-semibold tracking-tight tabular-nums">{`${taxa}%`}</CardTitle>
+                        <CardDescription className="text-xs">{`${n.segunda} de ${n.novos} clientes`}</CardDescription>
                     </CardHeader>
                 </Card>
             </div>
 
-            <Item variant="outline" className="bg-card">
+            <Item variant="outline" className="border-glass-border bg-card shadow-glass backdrop-blur-xl">
                 <ItemMedia variant="icon">
                     <Clock />
                 </ItemMedia>
@@ -191,14 +185,14 @@ export function Hoje()
                 </ItemActions>
             </Item>
 
-            <div className="mt-4 flex items-center justify-between">
-                <h2 className="font-heading text-lg font-semibold">Oportunidades de hoje</h2>
-                <Badge variant="outline" className={cn('tabular-nums', CLASSE_AVISO)}>{total}</Badge>
+            <div className="mt-3 flex items-center gap-2">
+                <h2 className="font-heading text-base font-semibold tracking-tight">Oportunidades de hoje</h2>
+                <Badge variant="secondary">{total}</Badge>
             </div>
 
             {total === 0
                 ? (
-                        <Empty className="border bg-card">
+                        <Empty className="bg-card shadow-glass ring-1 ring-glass-border backdrop-blur-xl">
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
                                     <PartyPopper />
@@ -211,7 +205,7 @@ export function Hoje()
                         </Empty>
                     )
                 : (
-                        <ul className="flex flex-col gap-3">
+                        <ul className="flex flex-col gap-2">
                             {problemas.map(c => <Oportunidade key={c.id} c={c} tipo="problema" />)}
                             {fila.slice(0, Math.max(0, MAX_OPORTUNIDADES - problemas.length)).map(x => (
                                 <Oportunidade
@@ -225,7 +219,7 @@ export function Hoje()
                         </ul>
                     )}
             {fila.length > Math.max(0, MAX_OPORTUNIDADES - problemas.length) && (
-                <Button asChild variant="ghost" className="w-full">
+                <Button asChild variant="ghost" size="sm" className="w-full text-muted-foreground">
                     <Link to="/mensagens?aba=programadas">
                         {`Ver todas as ${fila.length} mensagens preparadas`}
                     </Link>
@@ -254,7 +248,7 @@ interface OportunidadeProps
 
 /**
  * @summary
- * Cartão de um cliente a chamar hoje. Tem sempre a mesma altura: cabeçalho, uma linha de destaque e o botão.
+ * Cartão de um cliente a chamar hoje. Tem sempre a mesma altura: cabeçalho e uma linha de destaque que abre a conversa.
  *
  * @param props - Cliente, situação, tipo da mensagem e recompensa.
  * @returns O item da lista de oportunidades.
@@ -269,45 +263,52 @@ function Oportunidade({ c, s, tipo, rec }: OportunidadeProps)
             : `Há ${dias(s.desde)} sem comprar`;
     const acao = tipo === 'problema' ? 'Abrir conversa' : tipo === 'obrigado' || tipo === 'dica' ? 'Ver mensagem' : 'Ver lembrete';
 
+    const tom: Tom | undefined = tipo === 'problema' ? 'destructive' : rec ? 'warning' : undefined;
+
     return (
         <li>
             <Card size="sm">
-                <CardContent className="flex flex-col gap-3">
+                <CardContent className="flex flex-col gap-2.5">
                     <Item className="p-0">
                         <ItemMedia>
-                            <Avatar size="lg">
+                            <Avatar>
                                 <AvatarFallback>{iniciais(c.nome)}</AvatarFallback>
                             </Avatar>
                         </ItemMedia>
-                        <ItemContent className="min-w-0">
+                        <ItemContent className="min-w-0 gap-0">
                             <ItemTitle className="w-full truncate">{c.nome}</ItemTitle>
-                            <ItemDescription className="line-clamp-1">{sub}</ItemDescription>
+                            <ItemDescription className="line-clamp-1 text-xs">{sub}</ItemDescription>
                         </ItemContent>
                         <ItemActions>
-                            <Badge variant={selo.variant} className={cn('w-28', selo.className)}>{selo.rotulo}</Badge>
+                            <Badge variant={selo.variant} className="w-28">{selo.rotulo}</Badge>
                         </ItemActions>
                     </Item>
                     <Item
+                        asChild
                         size="sm"
                         variant="muted"
-                        className={cn(tipo === 'problema' ? 'bg-destructive/10 text-destructive' : rec && CLASSE_AVISO)}
+                        data-tom={tom}
+                        className={cn('rounded-xl py-1.5 pl-1.5', tom && TOM_SUPERFICIE[tom])}
                     >
-                        <ItemMedia variant="icon">
-                            {tipo === 'problema' ? <TriangleAlert /> : rec ? <Gift /> : <MessageSquareText />}
-                        </ItemMedia>
-                        <ItemContent className="min-w-0">
-                            <ItemTitle className="w-full truncate">
-                                {tipo === 'problema'
-                                    ? 'Respondeu: tive um problema'
-                                    : rec
-                                        ? rec.valor ? `${brl(rec.valor)} de crédito disponível` : `Recompensa: ${rec.descricao}`
-                                        : TIPO_MENSAGEM[tipo]}
-                            </ItemTitle>
-                        </ItemContent>
+                        <Link to={`/mensagens/${c.id}`}>
+                            <ItemMedia variant="icon">
+                                {tipo === 'problema' ? <TriangleAlert /> : rec ? <Gift /> : <MessageSquareText />}
+                            </ItemMedia>
+                            <ItemContent className="min-w-0">
+                                <ItemTitle className="w-full truncate font-normal">
+                                    {tipo === 'problema'
+                                        ? 'Respondeu: tive um problema'
+                                        : rec
+                                            ? rec.valor ? `${brl(rec.valor)} de crédito disponível` : `Recompensa: ${rec.descricao}`
+                                            : TIPO_MENSAGEM[tipo]}
+                                </ItemTitle>
+                            </ItemContent>
+                            <ItemActions className="gap-0.5 text-xs font-medium">
+                                {acao}
+                                <ChevronRight className="size-4 opacity-60" aria-hidden />
+                            </ItemActions>
+                        </Link>
                     </Item>
-                    <Button asChild variant="outline" className="w-full">
-                        <Link to={`/mensagens/${c.id}`}>{acao}</Link>
-                    </Button>
                 </CardContent>
             </Card>
         </li>

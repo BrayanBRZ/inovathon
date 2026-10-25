@@ -11,7 +11,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import {
     Empty,
     EmptyDescription,
@@ -20,7 +20,6 @@ import {
     EmptyTitle,
 } from '@/components/ui/empty';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
-import { Label } from '@/components/ui/label';
 import {
     Item,
     ItemActions,
@@ -41,7 +40,13 @@ import {
 import { dias, soDigitos } from '@/domain/formato';
 import { produtoDe } from '@/domain/recorrencia';
 import type { Dia, EstadoCliente, Situacao } from '@/domain/tipos';
-import { iniciais, retornou, seloCliente, useSituacoes } from '@/lib/estados';
+import {
+    iniciais,
+    retornou,
+    seloCliente,
+    type Tom,
+    useSituacoes,
+} from '@/lib/estados';
 import { useLotes } from '@/lib/listagem';
 import { cn } from '@/lib/utils';
 import { useHoje, useLoja } from '@/store/useFregues';
@@ -75,6 +80,17 @@ const FILTROS: OpcaoFiltro[] = [
     { valor: 'sumido', rotulo: 'Sumidos', descricao: 'Clientes sem comprar pelo prazo configurado na loja.' },
     { valor: 'retornou', rotulo: 'Retornaram', descricao: 'Clientes que voltaram por uma mensagem nos últimos 7 dias.' },
 ];
+/** Tom de cada filtro: o contador do resultado usa a mesma cor do selo dos clientes filtrados. */
+const TOM_FILTRO: Record<Filtro, Tom> = {
+    todos: 'secondary',
+    novos: 'secondary',
+    emdia: 'secondary',
+    voltar: 'warning',
+    perto: 'warning',
+    atrasado: 'warning',
+    sumido: 'destructive',
+    retornou: 'success',
+};
 const PRECISA_VOLTAR: EstadoCliente[] = ['perto', 'atrasado', 'sumido'];
 /** Quem precisa de ação aparece primeiro. */
 const ORDEM: EstadoCliente[] = [
@@ -151,12 +167,12 @@ export function Clientes()
 
     return (
         <div className="flex flex-col gap-3">
-            <header className="mb-2 flex items-start justify-between gap-3">
+            <header className="mb-1 flex items-start justify-between gap-3">
                 <div>
-                    <h1 className="font-heading text-2xl font-semibold tracking-tight">Clientes</h1>
+                    <h1 className="font-heading text-xl font-semibold tracking-tight">Clientes</h1>
                     <p className="text-sm text-muted-foreground">Conheça quem compra com você.</p>
                 </div>
-                <Button asChild variant="outline">
+                <Button asChild variant="outline" size="sm" className="rounded-full">
                     <Link to="/vender?novo=1">
                         <UserPlus data-icon="inline-start" />
                         {' '}
@@ -165,53 +181,44 @@ export function Clientes()
                 </Button>
             </header>
 
-            <Card className="py-4">
-                <CardContent className="flex flex-col gap-4 px-4">
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="busca-cliente">Buscar cliente</Label>
-                        <InputGroup className="h-11 bg-background/50">
-                            <InputGroupAddon><Search /></InputGroupAddon>
-                            <InputGroupInput
-                                id="busca-cliente"
-                                type="search"
-                                aria-label="Buscar cliente por nome, CPF ou número de telefone"
-                                placeholder="Nome, CPF ou número de telefone"
-                                autoComplete="off"
-                                value={busca}
-                                onChange={e => muda('q', e.target.value)}
-                            />
-                        </InputGroup>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="filtro-clientes">
-                            <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden />
-                            Filtrar clientes por status
-                        </Label>
-                        <Select value={filtro} onValueChange={v => muda('filtro', v === 'todos' ? '' : v)}>
-                            <SelectTrigger id="filtro-clientes" className="min-h-11 w-full bg-background/50">
-                                <SelectValue>{`${opcao.rotulo} (${contagens.get(filtro)})`}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {FILTROS.map(f => (
-                                    <SelectItem key={f.valor} value={f.valor}>
-                                        {`${f.rotulo} (${contagens.get(f.valor)})`}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="flex flex-col gap-2">
+                <InputGroup className="rounded-full">
+                    <InputGroupAddon className="pl-3.5"><Search /></InputGroupAddon>
+                    <InputGroupInput
+                        id="busca-cliente"
+                        type="search"
+                        aria-label="Buscar cliente por nome, CPF ou número de telefone"
+                        placeholder="Nome, CPF ou número de telefone"
+                        autoComplete="off"
+                        value={busca}
+                        onChange={e => muda('q', e.target.value)}
+                    />
+                </InputGroup>
+                <Select value={filtro} onValueChange={v => muda('filtro', v === 'todos' ? '' : v)}>
+                    <SelectTrigger id="filtro-clientes" aria-label="Filtrar clientes por status" className="h-10! w-full *:data-[slot=select-value]:flex-1">
+                        <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden />
+                        <SelectValue>{`${opcao.rotulo} (${contagens.get(filtro)})`}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="w-(--radix-select-trigger-width)">
+                        {FILTROS.map(f => (
+                            <SelectItem key={f.valor} value={f.valor}>
+                                <span className="flex-1">{f.rotulo}</span>
+                                <span className="text-xs text-muted-foreground tabular-nums">{contagens.get(f.valor)}</span>
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
 
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 pt-2">
-                <h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-0.5 pt-1">
+                <h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold tracking-tight">
                     <span className="truncate">{opcao.rotulo}</span>
-                    <Badge variant="secondary" className="tabular-nums">{lista.length}</Badge>
+                    <Badge variant={TOM_FILTRO[filtro]}>{lista.length}</Badge>
                 </h2>
                 <Button
                     variant="ghost"
                     size="sm"
-                    className={cn('min-h-11 shrink-0', !temFiltro && 'invisible')}
+                    className={cn('shrink-0 rounded-full text-muted-foreground', !temFiltro && 'invisible')}
                     disabled={!temFiltro}
                     aria-hidden={!temFiltro}
                     tabIndex={temFiltro ? undefined : -1}
@@ -233,7 +240,7 @@ export function Clientes()
 
             {lista.length === 0
                 ? (
-                        <Empty className="border bg-card">
+                        <Empty className="bg-card shadow-glass ring-1 ring-glass-border backdrop-blur-xl">
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
                                     <UsersRound />
@@ -263,19 +270,19 @@ export function Clientes()
                                     return (
                                         <div key={c.id} role="listitem">
                                             {i > 0 && <ItemSeparator className="my-0" />}
-                                            <Item asChild className="rounded-none px-4">
+                                            <Item asChild size="sm" className="rounded-none px-4">
                                                 <Link to={`/clientes/${c.id}`} state={lotes.estadoDetalhe}>
                                                     <ItemMedia>
-                                                        <Avatar size="lg">
+                                                        <Avatar>
                                                             <AvatarFallback>{iniciais(c.nome)}</AvatarFallback>
                                                         </Avatar>
                                                     </ItemMedia>
                                                     <ItemContent className="min-w-0">
                                                         <ItemTitle className="w-full truncate">{c.nome}</ItemTitle>
-                                                        <ItemDescription className="line-clamp-1">{sub}</ItemDescription>
+                                                        <ItemDescription className="line-clamp-1 text-xs">{sub}</ItemDescription>
                                                     </ItemContent>
                                                     <ItemActions>
-                                                        <Badge variant={selo.variant} className={cn('w-24', selo.className)}>
+                                                        <Badge variant={selo.variant} className="w-24">
                                                             {selo.rotulo}
                                                         </Badge>
                                                         <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
@@ -294,7 +301,7 @@ export function Clientes()
                         {`${lotes.exibidos} de ${lista.length} clientes`}
                     </p>
                     {lotes.temMais && (
-                        <Button variant="outline" size="lg" className="min-h-11 w-full" onClick={lotes.carregarMais}>
+                        <Button variant="outline" className="w-full rounded-full" onClick={lotes.carregarMais}>
                             Carregar mais clientes
                         </Button>
                     )}

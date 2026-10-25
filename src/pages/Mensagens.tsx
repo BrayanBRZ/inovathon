@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import {
     Empty,
     EmptyDescription,
@@ -20,7 +20,6 @@ import {
     EmptyTitle,
 } from '@/components/ui/empty';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
-import { Label } from '@/components/ui/label';
 import {
     Item,
     ItemActions,
@@ -43,7 +42,12 @@ import { filaDoDia } from '@/domain/fila';
 import { quando, soDigitos } from '@/domain/formato';
 import { textoMensagem, TIPO_MENSAGEM } from '@/domain/mensagens';
 import type { Cliente, Mensagem, StatusMensagem, TipoMensagem } from '@/domain/tipos';
-import { CLASSE_AVISO, iniciais, SELO_STATUS } from '@/lib/estados';
+import {
+    iniciais,
+    SELO_STATUS,
+    SELO_TIPO,
+    type VarianteSelo,
+} from '@/lib/estados';
 import { useLotes } from '@/lib/listagem';
 import { cn } from '@/lib/utils';
 import { useFregues, useHoje, useLoja } from '@/store/useFregues';
@@ -141,29 +145,32 @@ export function Mensagens()
         filtro,
         busca,
     ]));
-    const opcoes = aba === 'conversas'
+    // O contador do resultado usa a cor do selo filtrado; "todos" é neutro.
+    const opcoes: { valor: string; rotulo: string; quantidade: number; variant: VarianteSelo }[] = aba === 'conversas'
         ? [
-                { valor: 'todos', rotulo: 'Todos os status', quantidade: conversas.length },
+                { valor: 'todos', rotulo: 'Todos os status', quantidade: conversas.length, variant: 'secondary' },
                 ...STATUS.map(s => ({
                     valor: s,
                     rotulo: SELO_STATUS[s].rotulo,
                     quantidade: conversas.filter(({ m }) => m.status === s).length,
+                    variant: SELO_STATUS[s].variant,
                 })),
             ]
         : [
-                { valor: 'todos', rotulo: 'Todos os tipos', quantidade: fila.length },
+                { valor: 'todos', rotulo: 'Todos os tipos', quantidade: fila.length, variant: 'secondary' },
                 ...TIPOS.map(t => ({
                     valor: t,
                     rotulo: ROTULOS_TIPO[t] ?? TIPO_MENSAGEM[t],
                     quantidade: fila.filter(item => item.tipo === t).length,
+                    variant: SELO_TIPO[t].variant,
                 })),
             ];
     const opcao = opcoes.find(o => o.valor === filtro)!;
 
     return (
         <div className="flex flex-col gap-3">
-            <header className="mb-2">
-                <h1 className="font-heading text-2xl font-semibold tracking-tight">Mensagens</h1>
+            <header className="mb-1">
+                <h1 className="font-heading text-xl font-semibold tracking-tight">Mensagens</h1>
                 <p className="text-sm text-muted-foreground">Conversas que trazem clientes de volta.</p>
             </header>
 
@@ -172,67 +179,62 @@ export function Mensagens()
                     <TabsTrigger value="conversas">Conversas</TabsTrigger>
                     <TabsTrigger value="programadas">
                         Programadas
-                        <Badge variant="outline" className={cn('tabular-nums', CLASSE_AVISO)}>{fila.length}</Badge>
+                        <Badge variant="secondary">{fila.length}</Badge>
                     </TabsTrigger>
                 </TabsList>
 
-                <Card className="mt-3 py-4">
-                    <CardContent className="flex flex-col gap-4 px-4">
-                        <div className="flex flex-col gap-2">
-                            <Label htmlFor="busca-mensagens">Buscar cliente</Label>
-                            <InputGroup className="h-11 bg-background/50">
-                                <InputGroupAddon><Search /></InputGroupAddon>
-                                <InputGroupInput
-                                    id="busca-mensagens"
-                                    type="search"
-                                    aria-label="Buscar cliente por nome, CPF ou número de telefone"
-                                    placeholder="Nome, CPF ou número de telefone"
-                                    autoComplete="off"
-                                    value={busca}
-                                    onChange={e => muda('q', e.target.value)}
-                                />
-                            </InputGroup>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <Label htmlFor="filtro-mensagens">
-                                <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden />
-                                {aba === 'conversas' ? 'Filtrar conversas por status' : 'Filtrar programadas por tipo'}
-                            </Label>
-                            <Select
-                                value={filtro}
-                                onValueChange={v => muda(
-                                    aba === 'conversas' ? 'status' : 'tipo',
-                                    v === 'todos' ? '' : v,
-                                )}
-                            >
-                                <SelectTrigger id="filtro-mensagens" className="min-h-11 w-full bg-background/50">
-                                    <SelectValue>{`${opcao.rotulo} (${opcao.quantidade})`}</SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {opcoes.map(o => (
-                                        <SelectItem key={o.valor} value={o.valor}>
-                                            {`${o.rotulo} (${o.quantidade})`}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="mt-2 flex flex-col gap-2">
+                    <InputGroup className="rounded-full">
+                        <InputGroupAddon className="pl-3.5"><Search /></InputGroupAddon>
+                        <InputGroupInput
+                            id="busca-mensagens"
+                            type="search"
+                            aria-label="Buscar cliente por nome, CPF ou número de telefone"
+                            placeholder="Nome, CPF ou número de telefone"
+                            autoComplete="off"
+                            value={busca}
+                            onChange={e => muda('q', e.target.value)}
+                        />
+                    </InputGroup>
+                    <Select
+                        value={filtro}
+                        onValueChange={v => muda(
+                            aba === 'conversas' ? 'status' : 'tipo',
+                            v === 'todos' ? '' : v,
+                        )}
+                    >
+                        <SelectTrigger
+                            id="filtro-mensagens"
+                            aria-label={aba === 'conversas' ? 'Filtrar conversas por status' : 'Filtrar programadas por tipo'}
+                            className="h-10! w-full *:data-[slot=select-value]:flex-1"
+                        >
+                            <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden />
+                            <SelectValue>{`${opcao.rotulo} (${opcao.quantidade})`}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent position="popper" className="w-(--radix-select-trigger-width)">
+                            {opcoes.map(o => (
+                                <SelectItem key={o.valor} value={o.valor}>
+                                    <span className="flex-1">{o.rotulo}</span>
+                                    <span className="text-xs text-muted-foreground tabular-nums">{o.quantidade}</span>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
-                <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1">
-                    <h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+                <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-0.5">
+                    <h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold tracking-tight">
                         <span className="truncate">
                             {filtro === 'todos'
                                 ? aba === 'conversas' ? 'Todas as conversas' : 'Todas as programadas'
                                 : opcao.rotulo}
                         </span>
-                        <Badge variant="secondary" className="tabular-nums">{total}</Badge>
+                        <Badge variant={opcao.variant}>{total}</Badge>
                     </h2>
                     <Button
                         variant="ghost"
                         size="sm"
-                        className={cn('min-h-11 shrink-0', !temFiltro && 'invisible')}
+                        className={cn('shrink-0 rounded-full text-muted-foreground', !temFiltro && 'invisible')}
                         disabled={!temFiltro}
                         aria-hidden={!temFiltro}
                         tabIndex={temFiltro ? undefined : -1}
@@ -255,7 +257,7 @@ export function Mensagens()
                 <TabsContent value="conversas" className="mt-2">
                     {conversasFiltradas.length === 0
                         ? (
-                                <Empty className="border bg-card">
+                                <Empty className="bg-card shadow-glass ring-1 ring-glass-border backdrop-blur-xl">
                                     <EmptyHeader>
                                         <EmptyMedia variant="icon">
                                             <Inbox />
@@ -278,21 +280,21 @@ export function Mensagens()
                                             return (
                                                 <div key={c.id} role="listitem">
                                                     {i > 0 && <ItemSeparator className="my-0" />}
-                                                    <Item asChild className="rounded-none px-4">
+                                                    <Item asChild size="sm" className="rounded-none px-4">
                                                         <Link to={`/mensagens/${c.id}`} state={lotes.estadoDetalhe}>
                                                             <ItemMedia>
-                                                                <Avatar size="lg">
+                                                                <Avatar>
                                                                     <AvatarFallback>{iniciais(c.nome)}</AvatarFallback>
                                                                 </Avatar>
                                                             </ItemMedia>
                                                             <ItemContent className="min-w-0">
                                                                 <ItemTitle className="w-full truncate">{c.nome}</ItemTitle>
-                                                                <ItemDescription className="line-clamp-1">
+                                                                <ItemDescription className="line-clamp-1 text-xs">
                                                                     {`${quando(m.data, hoje)}, ${m.hora} · ${TIPO_MENSAGEM[m.tipo]}`}
                                                                 </ItemDescription>
                                                             </ItemContent>
                                                             <ItemActions>
-                                                                <Badge variant={st.variant} className={cn('w-24', st.className)}>{st.rotulo}</Badge>
+                                                                <Badge variant={st.variant} className="w-24">{st.rotulo}</Badge>
                                                             </ItemActions>
                                                         </Link>
                                                     </Item>
@@ -338,7 +340,7 @@ export function Mensagens()
                     </Button>
                     {programadas.length === 0
                         ? (
-                                <Empty className="border bg-card">
+                                <Empty className="bg-card shadow-glass ring-1 ring-glass-border backdrop-blur-xl">
                                     <EmptyHeader>
                                         <EmptyMedia variant="icon">
                                             <Inbox />
@@ -358,16 +360,16 @@ export function Mensagens()
                                         {programadas.slice(0, lotes.exibidos).map(({ cliente: c, tipo }, i) => (
                                             <div key={c.id} role="listitem">
                                                 {i > 0 && <ItemSeparator className="my-0" />}
-                                                <Item asChild className="rounded-none px-4">
+                                                <Item asChild size="sm" className="rounded-none px-4">
                                                     <Link to={`/mensagens/${c.id}`} state={lotes.estadoDetalhe}>
                                                         <ItemMedia>
-                                                            <Avatar size="lg">
+                                                            <Avatar>
                                                                 <AvatarFallback>{iniciais(c.nome)}</AvatarFallback>
                                                             </Avatar>
                                                         </ItemMedia>
                                                         <ItemContent className="min-w-0">
                                                             <ItemTitle className="w-full truncate">{c.nome}</ItemTitle>
-                                                            <ItemDescription className="line-clamp-1">{TIPO_MENSAGEM[tipo]}</ItemDescription>
+                                                            <ItemDescription className="line-clamp-1 text-xs">{TIPO_MENSAGEM[tipo]}</ItemDescription>
                                                         </ItemContent>
                                                         <ItemActions>
                                                             <span className="text-xs text-muted-foreground">{l.auto ? '9h' : 'Revisar'}</span>
@@ -389,14 +391,14 @@ export function Mensagens()
                         {`${lotes.exibidos} de ${total} ${aba === 'programadas' ? 'mensagens programadas' : 'conversas'}`}
                     </p>
                     {lotes.temMais && (
-                        <Button variant="outline" size="lg" className="min-h-11 w-full" onClick={lotes.carregarMais}>
+                        <Button variant="outline" className="w-full rounded-full" onClick={lotes.carregarMais}>
                             {aba === 'programadas' ? 'Carregar mais mensagens programadas' : 'Carregar mais conversas'}
                         </Button>
                     )}
                 </div>
             )}
 
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="ghost" size="sm" className="w-full text-muted-foreground">
                 <Link to="/ajustes#demo">
                     <SlidersHorizontal data-icon="inline-start" />
                     {' '}

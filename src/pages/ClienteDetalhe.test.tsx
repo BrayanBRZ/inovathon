@@ -82,21 +82,21 @@ describe('estimativa na ficha do cliente', () =>
         expect(html).toContain('A recompra está estimada para hoje.');
     });
 
-    it('mostra relógio verde quando a estimativa está além da antecedência do lembrete', () =>
+    it('mostra relógio no tom positivo quando a estimativa está além da antecedência do lembrete', () =>
     {
         vi.mocked(useHoje).mockReturnValue('2026-10-21');
         const html = renderCliente('Dona Maria');
         expect(html).toContain('aria-label="Data estimada ainda não chegou"');
-        expect(html).toMatch(/<svg[^>]*class="[^"]*text-secondary-foreground/);
+        expect(html).toMatch(/<svg[^>]*class="[^"]*text-success-foreground/);
         expect(html).toContain('Recompra estimada em 6 dias.');
     });
 
-    it('mostra relógio laranja quando a data passou e o cliente ainda não está sumido', () =>
+    it('mostra relógio âmbar (como o selo Atrasado) quando a data passou e o cliente ainda não está sumido', () =>
     {
         vi.mocked(useHoje).mockReturnValue('2026-10-28');
         const html = renderCliente('Dona Maria');
         expect(html).toContain('aria-label="Data estimada já passou"');
-        expect(html).toMatch(/<svg[^>]*class="[^"]*text-orange-700/);
+        expect(html).toMatch(/<svg[^>]*class="[^"]*text-warning-foreground/);
         expect(html).toContain('A data estimada passou há 1 dia.');
     });
 

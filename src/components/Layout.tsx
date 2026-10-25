@@ -10,10 +10,12 @@ import {
     UserRound,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
 import { iniciais } from '@/lib/estados';
 import type { EstadoListagem } from '@/lib/listagem';
+import { cn } from '@/lib/utils';
 import { useFregues, useLoja } from '@/store/useFregues';
 
 /**
@@ -116,19 +118,22 @@ export function Layout()
 
     return (
         <div className="min-h-dvh">
-            <header className="sticky top-0 z-30 border-b bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur">
-                <div className="mx-auto flex h-16 max-w-lg items-center gap-3 px-4">
-                    <Link to="/" className="flex min-w-0 flex-1 items-center gap-3">
-                        <Store className="size-6 shrink-0" aria-hidden />
+            <header className="sticky top-0 z-30 bg-background/60 pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150">
+                <div className="mx-auto flex h-14 max-w-lg items-center gap-3 px-4">
+                    <Link to="/" className="flex min-w-0 flex-1 items-center gap-2.5">
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                            <Store className="size-4" aria-hidden />
+                        </span>
                         <div className="min-w-0">
-                            <p className="font-heading text-base leading-tight font-semibold">Freguês</p>
+                            <p className="font-heading text-sm leading-tight font-semibold tracking-tight">Freguês</p>
                             <p className="truncate text-xs text-muted-foreground">{loja.nome}</p>
                         </div>
                     </Link>
+                    <Badge variant="outline" className="text-muted-foreground">Demo</Badge>
                     <Button asChild variant="ghost" size="icon-lg" className="rounded-full">
                         <Link to="/ajustes" aria-label={`Ajustes (${loja.dono})`}>
-                            <Avatar size="lg">
-                                <AvatarFallback className="bg-secondary font-medium text-secondary-foreground">
+                            <Avatar>
+                                <AvatarFallback className="bg-secondary text-xs font-medium text-secondary-foreground">
                                     {iniciais(loja.dono)}
                                 </AvatarFallback>
                             </Avatar>
@@ -137,35 +142,39 @@ export function Layout()
                 </div>
             </header>
 
-            <main ref={main} tabIndex={-1} className="mx-auto max-w-lg px-4 pt-5 pb-32 outline-none">
+            <main ref={main} tabIndex={-1} className="mx-auto max-w-lg px-4 pt-4 pb-32 outline-none">
                 <Outlet />
             </main>
 
-            <nav aria-label="Menu principal" className="fixed inset-x-0 bottom-0 z-30 border-t bg-card pb-[env(safe-area-inset-bottom)]">
-                <ul className="mx-auto grid h-16 max-w-lg grid-cols-5 gap-0.5 px-1 pt-1.5">
+            {/* Menu flutuante em vidro escuro; a venda fica no centro, em destaque. */}
+            <nav
+                aria-label="Menu principal"
+                className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-full bg-dock text-dock-foreground shadow-glass ring-1 ring-white/10 backdrop-blur-xl backdrop-saturate-150"
+            >
+                <ul className="grid h-16 grid-cols-5 items-center px-1.5">
                     {MENU.map(({ to, rotulo, Icone, central }) => (
-                        <li key={to}>
+                        <li key={to} className="flex justify-center">
                             {central
                                 ? (
-                                    // Ação principal: botão redondo no centro, acima da barra.
-                                        <Link
-                                            to={to}
-                                            aria-current={ativo(to) ? 'page' : undefined}
-                                            className="flex h-full flex-col items-center justify-end gap-0.5 pb-2.5 text-[0.68rem] font-medium tracking-tight text-muted-foreground"
+                                        <Button
+                                            asChild
+                                            size="icon-lg"
+                                            className="size-12 rounded-full bg-dock-foreground text-dock shadow-glass hover:bg-dock-foreground/90"
                                         >
-                                            <Button asChild size="icon-lg" className="-mt-8 size-14 rounded-full shadow-lg ring-4 ring-card">
-                                                <span>
-                                                    <Icone className="size-7" aria-hidden />
-                                                </span>
-                                            </Button>
-                                            {rotulo}
-                                        </Link>
+                                            <Link to={to} aria-label={rotulo} aria-current={ativo(to) ? 'page' : undefined}>
+                                                <Icone className="size-6" aria-hidden />
+                                            </Link>
+                                        </Button>
                                     )
                                 : (
                                         <Button
                                             asChild
-                                            variant={ativo(to) ? 'secondary' : 'ghost'}
-                                            className="h-full w-full flex-col gap-0.5 px-0 text-[0.68rem] tracking-tight"
+                                            variant="ghost"
+                                            className={cn(
+                                                'h-13 w-full flex-col gap-0.5 rounded-full px-0 text-[0.65rem] font-medium tracking-tight',
+                                                'text-dock-foreground/60 hover:bg-dock-foreground/10 hover:text-dock-foreground',
+                                                ativo(to) && 'bg-dock-foreground/12 text-dock-foreground',
+                                            )}
                                         >
                                             <Link to={to} aria-current={ativo(to) ? 'page' : undefined}>
                                                 <Icone className="size-5" aria-hidden />
@@ -176,10 +185,9 @@ export function Layout()
                         </li>
                     ))}
                 </ul>
-                <p className="py-1 text-center text-[0.68rem] text-muted-foreground">Dados de demonstração</p>
             </nav>
 
-            <Toaster position="bottom-center" offset={{ bottom: 112 }} mobileOffset={{ bottom: 112 }} closeButton />
+            <Toaster position="bottom-center" offset={{ bottom: 96 }} mobileOffset={{ bottom: 96 }} closeButton />
         </div>
     );
 }
