@@ -32,9 +32,10 @@ Arquivos gerados (`dist/` e `coverage/`), instruções em `.agents/`, documentos
 
 | Pasta | O que tem |
 | --- | --- |
-| `src/domain/` | Regras puras, sem React: estados do cliente (`recorrencia.ts`), textos (`mensagens.ts`), fila do dia e limite de 1 lembrete por semana (`fila.ts`), vendas, respostas e venda recuperada (`operacoes.ts`) |
+| `src/domain/` | Regras puras, sem React: estados do cliente (`recorrencia.ts`), textos e cobrança (`mensagens.ts`), fila e limite semanal (`fila.ts`), vendas e respostas (`operacoes.ts`), indicadores e gráfico derivados das compras (`resultados.ts`) |
 | `src/data/lojas.json` | As 3 lojas de exemplo (gás, ferramentas, tecidos): produtos, regras e clientes com as compras em "dias atrás" |
-| `src/data/seed.ts` | Monta as lojas do JSON com datas relativas a hoje, histórico de mensagens e gráfico do mês |
+| `src/data/seed.ts` | Monta as lojas do JSON com datas relativas a hoje e histórico de mensagens; não acrescenta totais artificiais |
+| `src/data/migracao.ts` | Atualiza dados locais antigos preservando clientes, compras e configurações |
 | `src/lib/estados.ts` | Auxiliares sem visual: rótulo e variante de `Badge` por estado, iniciais do `Avatar`, situação dos clientes |
 | `src/store/useFregues.ts` | Estado (zustand), salvo no `localStorage`. É aqui que entra a API C# na versão real |
 | `src/pages/` | Hoje, Clientes (+ ficha), Mensagens (+ conversa), Recompensas, Nova venda, Ajustes (+ produto). Sem janelas sobrepostas: cada ação abre uma página, e as confirmações aparecem como avisos (toasts) |
@@ -43,12 +44,17 @@ Arquivos gerados (`dist/` e `coverage/`), instruções em `.agents/`, documentos
 
 ## Regras do motor
 
-- **Novo** (uma compra): pós-venda no dia seguinte, dica com 1 semana, convite para a 2ª compra perto do prazo do produto.
+- **Novo** (uma compra): pós-venda no dia seguinte, dica com 1 semana quando cadastrada, convite para a 2ª compra perto do prazo do produto ou nos 5 dias anteriores ao vencimento do benefício (a partir do segundo dia).
+- O intervalo é aprendido entre compras em dias diferentes. Compras no mesmo dia não geram um ciclo de zero dias.
 - **Hora de lembrar**: faltam 5 dias ou menos para o intervalo médio.
 - **Atrasado**: passou de 1,25 vez o intervalo médio.
-- **Sumido**: passou dos dias da regra de sumidos; recebe a recompensa e, 30 dias depois, uma última tentativa.
-- Lembretes e convites: no máximo um a cada 7 dias por cliente.
-- Compra até 14 dias depois de um lembrete conta como **venda recuperada**.
+- **Sumido**: atingiu os dias da regra e ultrapassou a margem de atraso do próprio ritmo; recebe a recompensa e, 30 dias depois, uma última tentativa.
+- Lembretes e convites: no máximo um a cada 7 dias por cliente, inclusive em envios diretos e após uma nova compra. Mensagens livres são atendimento e não entram na atribuição comercial.
+- Problemas abertos pausam a régua até a resolução, que permanece acessível na conversa.
+- Compra até 14 dias depois de um convite elegível do ciclo atual conta como **venda recuperada**. Cada compra encerra os convites anteriores; um convite antigo não pode recuperar outra venda.
+- A recompensa da segunda compra é exclusiva dessa compra, mesmo quando o lojista opta por não utilizá-la. Os termos concedidos não mudam com alterações posteriores da regra.
+- Cashback e desconto reduzem a cobrança. O histórico preserva os valores bruto e cobrado; os resultados de recuperação usam o valor cobrado.
+- Receita recuperada e clientes distintos que voltaram consideram o mês exibido até o dia da demonstração. A taxa de segunda compra considera toda a base cadastrada até esse dia. O gráfico mostra as compras recuperadas dos últimos 7 dias, inclusive quando atravessam meses.
 
 ## Demonstração
 
