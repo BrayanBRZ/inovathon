@@ -1,0 +1,145 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/atkinson-hyperlegible-next/wght.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-warning: var(--warning);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * Tema do Freguês sobre os tokens do shadcn/ui (paleta de .docs/color-design.md, ajustada para WCAG AA):
+ * primary = marinho; secondary = teal suave (estados positivos); warning = âmbar suave (lembretes e crédito);
+ * chart-1 = teal #16A085, usado só em gráficos e controles (3,3:1, suficiente para não-texto).
+ */
+:root {
+    --background: #F6F4EE;
+    --foreground: #14213D;
+    --card: #FFFFFF;
+    --card-foreground: #14213D;
+    --popover: #FFFFFF;
+    --popover-foreground: #14213D;
+    --primary: #14213D;
+    --primary-foreground: #FFFFFF;
+    --secondary: #E3F1EC;
+    --secondary-foreground: #0D6E5C;
+    --muted: #F1EFE8;
+    --muted-foreground: #5A6377;
+    --accent: #F1EFE8;
+    --accent-foreground: #14213D;
+    --destructive: #B3261E;
+    --warning: #FBF0D0;
+    --warning-foreground: #6B4E00;
+    --border: #E4E2DA;
+    --input: #D4D1C7;
+    --ring: #16A085;
+    --chart-1: #16A085;
+    --chart-2: #0D6E5C;
+    --chart-3: #F2C14E;
+    --chart-4: #1F4E8C;
+    --chart-5: #4A5570;
+    --radius: 0.75rem;
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #14213D;
+    --sidebar-primary: #14213D;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #F1EFE8;
+    --sidebar-accent-foreground: #14213D;
+    --sidebar-border: #E4E2DA;
+    --sidebar-ring: #16A085;
+}
+
+.dark {
+    --background: #0F1626;
+    --foreground: #EEF1F6;
+    --card: #172036;
+    --card-foreground: #EEF1F6;
+    --popover: #172036;
+    --popover-foreground: #EEF1F6;
+    --primary: #E9EEF5;
+    --primary-foreground: #0F1626;
+    --secondary: #12372F;
+    --secondary-foreground: #6FDCBF;
+    --muted: #1E2A44;
+    --muted-foreground: #A9B4C8;
+    --accent: #1E2A44;
+    --accent-foreground: #EEF1F6;
+    --destructive: #FF8A80;
+    --warning: #3A3018;
+    --warning-foreground: #F2C14E;
+    --border: #26324A;
+    --input: #33415E;
+    --ring: #6FDCBF;
+    --chart-1: #26A88A;
+    --chart-2: #6FDCBF;
+    --chart-3: #F2C14E;
+    --chart-4: #8DB7F2;
+    --chart-5: #A9B4C8;
+    --sidebar: #172036;
+    --sidebar-foreground: #EEF1F6;
+    --sidebar-primary: #E9EEF5;
+    --sidebar-primary-foreground: #0F1626;
+    --sidebar-accent: #1E2A44;
+    --sidebar-accent-foreground: #EEF1F6;
+    --sidebar-border: #26324A;
+    --sidebar-ring: #6FDCBF;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  html {
+    @apply font-sans;
+  }
+  /* "Letra maior" nos Ajustes: o layout usa rem e acompanha. */
+  html.letra-grande {
+    font-size: 112.5%;
+  }
+}

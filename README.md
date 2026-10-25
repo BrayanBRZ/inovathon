@@ -1,0 +1,57 @@
+# Freguês – app (React + TypeScript + shadcn/ui)
+
+Front-end do Freguês com dados de exemplo no navegador. Ainda não tem servidor e não envia mensagens de verdade.
+
+## Rodar
+
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm test         # testes do motor de recorrência
+npm run build    # gera dist/ (PWA, funciona em qualquer hospedagem estática)
+```
+
+## Formatação e lint
+
+```bash
+npm run format        # formata JavaScript e TypeScript, incluindo JSX e TSX
+npm run format:check  # verifica as regras do ESLint sem alterar arquivos
+npm run lint          # executa Oxlint e ESLint
+npm run lint:fix      # aplica as correções automáticas dos dois linters
+```
+
+O `eslint.config.js` define o estilo do código: quatro espaços, aspas simples, ponto e vírgula e chaves Allman. O ESLint Stylistic aplica a formatação; o Oxlint mantém as verificações de React e de correção existentes.
+
+O `.editorconfig` define UTF-8, finais de linha LF e uma linha final. JavaScript, TypeScript e CSS usam quatro espaços; os demais arquivos usam dois. Espaços no fim das linhas são removidos, exceto em Markdown. O `.gitattributes` preserva LF ao utilizar Git.
+
+No VS Code, instale as extensões recomendadas pelo projeto. A configuração compartilhada usa o ESLint para formatar JavaScript e TypeScript ao salvar. Não habilite outro formatador para esses arquivos, pois ele pode contrariar o estilo Allman. Os comandos de formatação não processam CSS, JSON ou Markdown; nesses arquivos, use o formatador do editor respeitando o EditorConfig.
+
+Arquivos gerados (`dist/` e `coverage/`), instruções em `.agents/`, documentos em `.docs/` e o protótipo de referência ficam fora do lint da aplicação.
+
+## Estrutura
+
+| Pasta | O que tem |
+| --- | --- |
+| `src/domain/` | Regras puras, sem React: estados do cliente (`recorrencia.ts`), textos (`mensagens.ts`), fila do dia e limite de 1 lembrete por semana (`fila.ts`), vendas, respostas e venda recuperada (`operacoes.ts`) |
+| `src/data/lojas.json` | As 3 lojas de exemplo (gás, ferramentas, tecidos): produtos, regras e clientes com as compras em "dias atrás" |
+| `src/data/seed.ts` | Monta as lojas do JSON com datas relativas a hoje, histórico de mensagens e gráfico do mês |
+| `src/lib/estados.ts` | Auxiliares sem visual: rótulo e variante de `Badge` por estado, iniciais do `Avatar`, situação dos clientes |
+| `src/store/useFregues.ts` | Estado (zustand), salvo no `localStorage`. É aqui que entra a API C# na versão real |
+| `src/pages/` | Hoje, Clientes (+ ficha), Mensagens (+ conversa), Recompensas, Nova venda, Ajustes (+ produto). Sem janelas sobrepostas: cada ação abre uma página, e as confirmações aparecem como avisos (toasts) |
+| `src/components/ui/` | Componentes oficiais do shadcn/ui, só reformatados pelo ESLint do projeto. As telas usam apenas eles (regra do `AGENTS.md`) |
+| `src/index.css` | Tema: tokens do shadcn com a paleta de `.docs/color-design.md` e o token extra `warning` (âmbar) |
+
+## Regras do motor
+
+- **Novo** (uma compra): pós-venda no dia seguinte, dica com 1 semana, convite para a 2ª compra perto do prazo do produto.
+- **Hora de lembrar**: faltam 5 dias ou menos para o intervalo médio.
+- **Atrasado**: passou de 1,25 vez o intervalo médio.
+- **Sumido**: passou dos dias da regra de sumidos; recebe a recompensa e, 30 dias depois, uma última tentativa.
+- Lembretes e convites: no máximo um a cada 7 dias por cliente.
+- Compra até 14 dias depois de um lembrete conta como **venda recuperada**.
+
+## Demonstração
+
+Em **Ajustes → Modo demonstração** (avatar no canto superior direito): trocar a loja de exemplo, avançar 1 dia e restaurar os dados.
+
+Roteiro do pitch: Hoje → Marcos "Ver lembrete" → Enviar agora → simular "Pode trazer!" → Registrar nova compra → Registrar venda (venda recuperada). Lucas: Ver mensagem → Enviar agora → "Tive um problema" → alerta em Hoje → Marcar como resolvido.

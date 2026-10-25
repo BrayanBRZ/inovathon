@@ -1,0 +1,417 @@
+[
+  {
+    "id": "gas",
+    "dono": "Cida Alves",
+    "nome": "Gás e Churrasco da Cida",
+    "de": "do Gás da Cida",
+    "tel": "(44) 3422-4050",
+    "regraSumido": {
+      "ativa": true,
+      "dias": 60,
+      "tipo": "brinde",
+      "pct": 10,
+      "brinde": "1 saco de carvão de 3 kg"
+    },
+    "regraSegunda": {
+      "ativa": true,
+      "dias": 45,
+      "tipo": "cashback",
+      "pct": 5,
+      "brinde": "1 pacote de sal grosso"
+    },
+    "numeros": {
+      "recuperado": 1380,
+      "voltaram": 12,
+      "novos": 20,
+      "segunda": 6,
+      "problemas": 2,
+      "recompensasUsadas": 4
+    },
+    "produtos": [
+      {
+        "id": "p13",
+        "nome": "Gás P13",
+        "preco": 115,
+        "ciclo": 40,
+        "msg": "Seu gás P13 deve estar acabando. Quer que a gente leve hoje?",
+        "dica": "Guarde o botijão em pé, num lugar ventilado e longe do fogão. Sentiu cheiro de gás, chama a gente."
+      },
+      {
+        "id": "p45",
+        "nome": "Gás P45",
+        "preco": 450,
+        "ciclo": 90,
+        "msg": "O P45 deve estar perto do fim. Quer agendar a troca?",
+        "dica": "Confira a validade da mangueira e do regulador. Se precisar, a gente troca."
+      },
+      {
+        "id": "agua",
+        "nome": "Água 20 L",
+        "preco": 15,
+        "ciclo": 10,
+        "msg": "Sua água deve estar acabando. Quer que a gente leve hoje?",
+        "dica": "Lave o bebedouro a cada troca de galão pra água continuar boa."
+      },
+      {
+        "id": "carvao",
+        "nome": "Carvão 5 kg",
+        "preco": 30,
+        "ciclo": 15,
+        "msg": "O carvão deve estar no fim. Separo um saco pro fim de semana?",
+        "dica": "Pra acender mais rápido, use papel e álcool em gel. Nunca álcool líquido."
+      },
+      {
+        "id": "kit",
+        "nome": "Kit churrasco",
+        "preco": 90,
+        "ciclo": 30,
+        "msg": "Fim de semana chegando! Separo um kit churrasco pra você?",
+        "dica": "Tire a carne da geladeira 30 minutos antes de ir pra grelha."
+      }
+    ],
+    "clientes": [
+      {
+        "nome": "Dona Maria Aparecida",
+        "chamar": "Dona Maria",
+        "tel": "(44) 99812-3344",
+        "prod": "p13",
+        "dias": [
+          116,
+          77,
+          37
+        ]
+      },
+      {
+        "nome": "Seu Jorge Batista",
+        "chamar": "Seu Jorge",
+        "tel": "(44) 99741-2210",
+        "prod": "p13",
+        "dias": [
+          150,
+          110,
+          72
+        ]
+      },
+      {
+        "nome": "Rosângela Lima",
+        "chamar": "Rosângela",
+        "tel": "(44) 99655-0912",
+        "prod": "agua",
+        "dias": [
+          32,
+          22,
+          12,
+          1
+        ],
+        "recuperadas": [
+          {
+            "dia": 1,
+            "lembrete": 2,
+            "tipo": "perto"
+          }
+        ]
+      },
+      {
+        "nome": "Bar do Tião",
+        "chamar": "Tião",
+        "tel": "(44) 99430-1180",
+        "prod": "p45",
+        "dias": [
+          200,
+          110,
+          20
+        ]
+      },
+      {
+        "nome": "Cláudia Ferreira",
+        "chamar": "Cláudia",
+        "tel": "(44) 99903-4471",
+        "prod": "carvao",
+        "dias": [
+          60,
+          45,
+          29
+        ]
+      },
+      {
+        "nome": "Paulo Henrique",
+        "chamar": "Paulo",
+        "tel": "(44) 99128-7765",
+        "prod": "p13",
+        "dias": [
+          90,
+          50,
+          9
+        ],
+        "recuperadas": [
+          {
+            "dia": 9,
+            "lembrete": 3,
+            "tipo": "perto"
+          }
+        ]
+      },
+      {
+        "nome": "Edna Souza",
+        "chamar": "Edna",
+        "tel": "(44) 99877-6120",
+        "prod": "kit",
+        "dias": [
+          100,
+          65
+        ]
+      },
+      {
+        "nome": "Lucas Andrade",
+        "chamar": "Lucas",
+        "tel": "(44) 99702-5531",
+        "prod": "p13",
+        "dias": [
+          1
+        ]
+      },
+      {
+        "nome": "Fernanda Costa",
+        "chamar": "Fernanda",
+        "tel": "(44) 99610-2287",
+        "prod": "carvao",
+        "dias": [
+          8
+        ]
+      },
+      {
+        "nome": "Marcos Vieira",
+        "chamar": "Marcos",
+        "tel": "(44) 99554-9083",
+        "prod": "p13",
+        "dias": [
+          37
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ferramentas",
+    "dono": "Valdir Souza",
+    "nome": "Valdir Ferramentas (reparo)",
+    "de": "da Valdir Ferramentas",
+    "tel": "(44) 3423-9911",
+    "regraSumido": {
+      "ativa": true,
+      "dias": 200,
+      "tipo": "brinde",
+      "pct": 10,
+      "brinde": "limpeza grátis da ferramenta"
+    },
+    "regraSegunda": {
+      "ativa": true,
+      "dias": 90,
+      "tipo": "brinde",
+      "pct": 10,
+      "brinde": "limpeza grátis da ferramenta"
+    },
+    "numeros": {
+      "recuperado": 640,
+      "voltaram": 7,
+      "novos": 12,
+      "segunda": 4,
+      "problemas": 1,
+      "recompensasUsadas": 2
+    },
+    "produtos": [
+      {
+        "id": "furadeira",
+        "nome": "Revisão de furadeira",
+        "preco": 80,
+        "ciclo": 180,
+        "msg": "Sua furadeira está perto da revisão. Quer agendar esta semana?",
+        "dica": "Limpe as entradas de ar depois do uso pro motor durar mais."
+      },
+      {
+        "id": "serra",
+        "nome": "Revisão de serra circular",
+        "preco": 120,
+        "ciclo": 120,
+        "msg": "Sua serra circular está na hora da revisão. Quer agendar?",
+        "dica": "Troque o disco quando o corte começar a queimar a madeira."
+      },
+      {
+        "id": "escovas",
+        "nome": "Troca de escovas do motor",
+        "preco": 60,
+        "ciclo": 240,
+        "msg": "As escovas do motor devem estar gastas. Quer trazer pra trocar?",
+        "dica": "Se o motor soltar faísca demais, as escovas estão no fim."
+      }
+    ],
+    "clientes": [
+      {
+        "nome": "Marcenaria Pinheiro",
+        "chamar": "pessoal da Marcenaria",
+        "tel": "(44) 99523-5520",
+        "prod": "serra",
+        "dias": [
+          250,
+          130,
+          12
+        ]
+      },
+      {
+        "nome": "Seu Antônio Rocha",
+        "chamar": "Seu Antônio",
+        "tel": "(44) 99830-1145",
+        "prod": "furadeira",
+        "dias": [
+          360,
+          178
+        ]
+      },
+      {
+        "nome": "Construtora Boa Obra",
+        "chamar": "pessoal da Boa Obra",
+        "tel": "(44) 99421-7788",
+        "prod": "serra",
+        "dias": [
+          370,
+          250,
+          125
+        ]
+      },
+      {
+        "nome": "Juliano Martins",
+        "chamar": "Juliano",
+        "tel": "(44) 99712-6634",
+        "prod": "escovas",
+        "dias": [
+          230
+        ]
+      },
+      {
+        "nome": "Thiago Ramos",
+        "chamar": "Thiago",
+        "tel": "(44) 99645-2219",
+        "prod": "furadeira",
+        "dias": [
+          1
+        ]
+      },
+      {
+        "nome": "Oficina do Beto",
+        "chamar": "Beto",
+        "tel": "(44) 99588-4410",
+        "prod": "serra",
+        "dias": [
+          10
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tecidos",
+    "dono": "Nelson Prado",
+    "nome": "Tecidos do Nelson",
+    "de": "dos Tecidos do Nelson",
+    "tel": "(44) 3424-3030",
+    "regraSumido": {
+      "ativa": true,
+      "dias": 90,
+      "tipo": "brinde",
+      "pct": 10,
+      "brinde": "1 metro de viés"
+    },
+    "regraSegunda": {
+      "ativa": true,
+      "dias": 60,
+      "tipo": "cashback",
+      "pct": 5,
+      "brinde": "1 metro de viés"
+    },
+    "numeros": {
+      "recuperado": 790,
+      "voltaram": 11,
+      "novos": 16,
+      "segunda": 5,
+      "problemas": 1,
+      "recompensasUsadas": 3
+    },
+    "produtos": [
+      {
+        "id": "tecido",
+        "nome": "Tecido para costura",
+        "preco": 70,
+        "ciclo": 60,
+        "msg": "Chegaram tecidos novos pra costura. Quer que eu mande fotos?",
+        "dica": "Lave o tecido antes de cortar pra ele não encolher depois de costurado."
+      },
+      {
+        "id": "malha",
+        "nome": "Malha",
+        "preco": 55,
+        "ciclo": 45,
+        "msg": "Chegou malha nova. Quer ver as cores?",
+        "dica": "Use agulha ponta bola na malha pra não puxar fio."
+      },
+      {
+        "id": "aviam",
+        "nome": "Viés e aviamentos",
+        "preco": 20,
+        "ciclo": 30,
+        "msg": "Tem viés e aviamentos novos. Separo pra você?",
+        "dica": "Passe o viés a ferro antes de costurar pra ele assentar melhor."
+      }
+    ],
+    "clientes": [
+      {
+        "nome": "Ateliê da Neide",
+        "chamar": "Neide",
+        "tel": "(44) 99731-0091",
+        "prod": "tecido",
+        "dias": [
+          180,
+          120,
+          58
+        ]
+      },
+      {
+        "nome": "Joana Prado (costureira)",
+        "chamar": "Joana",
+        "tel": "(44) 99620-4417",
+        "prod": "malha",
+        "dias": [
+          140,
+          96,
+          51
+        ]
+      },
+      {
+        "nome": "Dona Lourdes",
+        "chamar": "Dona Lourdes",
+        "tel": "(44) 99854-7302",
+        "prod": "tecido",
+        "dias": [
+          220,
+          160,
+          101
+        ]
+      },
+      {
+        "nome": "Patrícia Melo",
+        "chamar": "Patrícia",
+        "tel": "(44) 99603-1188",
+        "prod": "malha",
+        "dias": [
+          2
+        ]
+      },
+      {
+        "nome": "Carla Nunes",
+        "chamar": "Carla",
+        "tel": "(44) 99777-5426",
+        "prod": "tecido",
+        "dias": [
+          57
+        ]
+      }
+    ]
+  }
+]
