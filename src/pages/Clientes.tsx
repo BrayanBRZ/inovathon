@@ -4,7 +4,6 @@ import {
     ChevronRight,
     Search,
     SlidersHorizontal,
-    UserPlus,
     UsersRound,
     X,
 } from 'lucide-react';
@@ -115,7 +114,7 @@ function passaFiltro(s: Situacao, valor: Filtro, hoje: Dia): boolean
  * @summary
  * Lista de clientes em lotes, com busca e filtro por situação preservados na navegação.
  *
- * @returns A tela Clientes.
+ * @returns A listagem de clientes usada na aba de Gerenciamento.
  */
 export function Clientes()
 {
@@ -167,20 +166,6 @@ export function Clientes()
 
     return (
         <div className="flex flex-col gap-3">
-            <header className="mb-1 flex items-start justify-between gap-3">
-                <div>
-                    <h1 className="font-heading text-xl font-semibold tracking-tight">Clientes</h1>
-                    <p className="text-sm text-muted-foreground">Conheça quem compra com você.</p>
-                </div>
-                <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link to="/vender?novo=1">
-                        <UserPlus data-icon="inline-start" />
-                        {' '}
-                        Novo
-                    </Link>
-                </Button>
-            </header>
-
             <div className="flex flex-col gap-2">
                 <InputGroup className="rounded-full">
                     <InputGroupAddon className="pl-3.5"><Search /></InputGroupAddon>
@@ -255,8 +240,8 @@ export function Clientes()
                         </Empty>
                     )
                 : (
-                        <Card className="py-1">
-                            <ItemGroup className="gap-0">
+                        <Card className="py-0">
+                            <ItemGroup className="gap-0!">
                                 {lista.slice(0, lotes.exibidos).map((c, i) =>
                                 {
                                     const s = sits.get(c.id)!;
@@ -270,7 +255,7 @@ export function Clientes()
                                     return (
                                         <div key={c.id} role="listitem">
                                             {i > 0 && <ItemSeparator className="my-0" />}
-                                            <Item asChild size="sm" className="rounded-none px-4">
+                                            <Item asChild size="sm" className="rounded-none px-4 py-3.5">
                                                 <Link to={`/clientes/${c.id}`} state={lotes.estadoDetalhe}>
                                                     <ItemMedia>
                                                         <Avatar>

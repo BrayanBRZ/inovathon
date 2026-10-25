@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
 import { useTheme } from 'next-themes';
-import { CalendarPlus, ChevronRight, Plus, RotateCcw } from 'lucide-react';
+import { CalendarPlus, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,8 +26,6 @@ import {
     ItemActions,
     ItemContent,
     ItemDescription,
-    ItemGroup,
-    ItemSeparator,
     ItemTitle,
 } from '@/components/ui/item';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -45,7 +43,7 @@ import {
 
 /**
  * @summary
- * Ajustes da loja: dados, produtos, preferências, plano e modo demonstração.
+ * Ajustes da loja: dados, preferências, plano e modo demonstração.
  *
  * @remarks
  * O endereço `/ajustes#demo` rola direto até o modo demonstração.
@@ -69,50 +67,10 @@ export function Ajustes()
         <div className="flex flex-col gap-3">
             <header className="mb-1">
                 <h1 className="font-heading text-xl font-semibold tracking-tight">Ajustes</h1>
-                <p className="text-sm text-muted-foreground">Loja, produtos e preferências.</p>
+                <p className="text-sm text-muted-foreground">Dados da loja e preferências.</p>
             </header>
 
             <MinhaLoja key={l.id} />
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Produtos e prazos de recompra</CardTitle>
-                    <CardDescription>
-                        O prazo vale até haver compras em dias diferentes. Depois, o Freguês aprende o ritmo de cada um.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ItemGroup className="gap-0">
-                        {l.produtos.map((p, i) => (
-                            <div key={p.id} role="listitem">
-                                {i > 0 && <ItemSeparator className="my-0" />}
-                                <Item asChild className="rounded-none px-0">
-                                    <Link to={`/ajustes/produtos/${p.id}`}>
-                                        <ItemContent className="min-w-0">
-                                            <ItemTitle className="w-full truncate">{p.nome}</ItemTitle>
-                                            <ItemDescription className="line-clamp-1 tabular-nums">
-                                                {`${brl(p.preco)} · volta a cada ${p.ciclo} dias`}
-                                            </ItemDescription>
-                                        </ItemContent>
-                                        <ItemActions>
-                                            <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
-                                        </ItemActions>
-                                    </Link>
-                                </Item>
-                            </div>
-                        ))}
-                    </ItemGroup>
-                </CardContent>
-                <CardFooter>
-                    <Button asChild variant="outline" className="w-full">
-                        <Link to="/ajustes/produtos/novo">
-                            <Plus data-icon="inline-start" />
-                            {' '}
-                            Novo produto
-                        </Link>
-                    </Button>
-                </CardFooter>
-            </Card>
 
             <Card>
                 <CardHeader>

@@ -9,8 +9,8 @@ import {
 import { Layout } from '@/components/Layout';
 import { Ajustes } from '@/pages/Ajustes';
 import { ClienteDetalhe } from '@/pages/ClienteDetalhe';
-import { Clientes } from '@/pages/Clientes';
 import { Conversa } from '@/pages/Conversa';
+import { Gerenciamento } from '@/pages/Gerenciamento';
 import { Hoje } from '@/pages/Hoje';
 import { Mensagens } from '@/pages/Mensagens';
 import { Produto } from '@/pages/Produto';
@@ -58,13 +58,14 @@ export default function App()
             <Routes>
                 <Route element={<Layout />}>
                     <Route index element={<Hoje />} />
-                    <Route path="clientes" element={<Clientes />} />
+                    <Route path="clientes" element={<Gerenciamento />} />
                     <Route path="clientes/:id" element={<ClienteDetalhe />} />
                     <Route path="mensagens" element={<Mensagens />} />
                     <Route path="mensagens/:id" element={<Conversa />} />
                     <Route path="recompensas" element={<ComChave><Recompensas /></ComChave>} />
                     <Route path="vender" element={<ComChave url><Vender /></ComChave>} />
                     <Route path="ajustes" element={<Ajustes />} />
+                    <Route path="produtos/:id" element={<ComChave><Produto /></ComChave>} />
                     <Route path="ajustes/produtos/:id" element={<ComChave><Produto /></ComChave>} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>

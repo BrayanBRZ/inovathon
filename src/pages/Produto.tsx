@@ -11,15 +11,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { parseValor, valorParaCampo } from '@/domain/formato';
 import { novoId } from '@/domain/operacoes';
 import type { Produto as TProduto } from '@/domain/tipos';
+import { useRetornoLista } from '@/lib/listagem';
 import { campoMascarado, mascaraValor } from '@/lib/mascaras';
 import { produtoEmUso, useFregues, useLoja } from '@/store/useFregues';
 
 /**
  * @summary
- * Cadastro ou edição de um produto (`/ajustes/produtos/:id`, com `novo` para cadastrar).
+ * Cadastro ou edição de um produto (`/produtos/:id`, com `novo` para cadastrar).
  *
  * @remarks
- * Redireciona para Ajustes quando o produto da URL não existe na loja atual.
+ * Redireciona para a aba Produtos quando o produto da URL não existe na loja atual.
  *
  * @returns A tela do produto.
  */
@@ -28,7 +29,7 @@ export function Produto()
     const { id } = useParams();
     const l = useLoja();
     const existente = l.produtos.find(p => p.id === id);
-    if (id !== 'novo' && !existente) return <Navigate to="/ajustes" replace />;
+    if (id !== 'novo' && !existente) return <Navigate to="/clientes?aba=produtos" replace />;
     return (
         <Form
             key={id}
@@ -70,6 +71,8 @@ function Form({ inicial, novo }: FormProps)
     const l = useLoja();
     const { salvarProduto, removerProduto } = useFregues();
     const navigate = useNavigate();
+    const retorno = useRetornoLista('/clientes');
+    const destino = retorno.to.includes('aba=produtos') ? retorno : { to: '/clientes?aba=produtos', state: null };
     const [p, setP] = useState(inicial);
     const [preco, setPreco] = useState(inicial.preco ? valorParaCampo(inicial.preco) : '');
     const [ciclo, setCiclo] = useState(String(inicial.ciclo));
@@ -89,10 +92,10 @@ function Form({ inicial, novo }: FormProps)
     return (
         <div className="flex flex-col gap-3">
             <Button asChild variant="ghost" size="sm" className="-ml-2 self-start text-muted-foreground">
-                <Link to="/ajustes">
+                <Link {...destino}>
                     <ChevronLeft data-icon="inline-start" />
                     {' '}
-                    Ajustes
+                    Produtos
                 </Link>
             </Button>
             <header className="mb-1">
@@ -117,7 +120,7 @@ function Form({ inicial, novo }: FormProps)
                                 ciclo: Number(ciclo),
                             });
                             toast.success(novo ? 'Produto cadastrado.' : 'Produto salvo.');
-                            navigate('/ajustes');
+                            navigate(destino.to, { state: destino.state });
                         }}
                     >
                         <FieldGroup className="grid grid-cols-2 gap-4">
@@ -194,7 +197,7 @@ function Form({ inicial, novo }: FormProps)
                                     {
                                         removerProduto(p.id);
                                         toast.success('Produto removido.');
-                                        navigate('/ajustes');
+                                        navigate(destino.to, { state: destino.state });
                                     },
                                 },
                             })}
