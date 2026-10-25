@@ -36,11 +36,11 @@ Arquivos gerados (`dist/` e `coverage/`), instruções em `.agents/`, documentos
 | `src/data/lojas.json` | As 3 lojas de exemplo (gás, ferramentas, tecidos): produtos, regras e clientes com as compras em "dias atrás" |
 | `src/data/seed.ts` | Monta as lojas do JSON com datas relativas a hoje e histórico de mensagens; não acrescenta totais artificiais |
 | `src/data/migracao.ts` | Atualiza dados locais antigos preservando clientes, compras e configurações |
-| `src/lib/estados.ts` | Auxiliares sem visual: rótulo e variante de `Badge` por estado, iniciais do `Avatar`, situação dos clientes |
+| `src/lib/estados.ts` | Mapa único de estado → tom (neutro, atenção, positivo, problema): variante de `Badge`, classes de superfície e texto; iniciais do `Avatar`; situação dos clientes |
 | `src/store/useFregues.ts` | Estado (zustand), salvo no `localStorage`. É aqui que entra a API C# na versão real |
 | `src/pages/` | Hoje, Clientes (+ ficha), Mensagens (+ conversa), Recompensas, Nova venda, Ajustes (+ produto). Sem janelas sobrepostas: cada ação abre uma página, e as confirmações aparecem como avisos (toasts) |
-| `src/components/ui/` | Componentes oficiais do shadcn/ui, só reformatados pelo ESLint do projeto. As telas usam apenas eles (regra do `AGENTS.md`) |
-| `src/index.css` | Tema: tokens do shadcn com a paleta de `.docs/color-design.md` e o token extra `warning` (âmbar) |
+| `src/components/ui/` | Componentes oficiais do shadcn/ui com ajustes de tema nas classes base: superfícies de vidro (Card, Select, Tabs, campos, toasts) e variantes `warning`/`success` em `Badge` e `Alert`. As telas usam apenas eles (regra do `AGENTS.md`) |
+| `src/index.css` | Tema: tokens do shadcn com o marinho de `.docs/color-design.md`, tokens extras `warning`, `success`, `glass-*` e `dock`, e brilhos suaves no fundo para o efeito de vidro |
 
 ## Regras do motor
 
